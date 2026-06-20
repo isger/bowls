@@ -16,7 +16,7 @@ export async function SiteHeader() {
         <div className="h-16 flex items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 shrink-0">
-            <Image src="/logo.png" alt="Ferndown Bowls Club" width={44} height={44} className="rounded-full" />
+            <Image src="/logo.png" alt="Ferndown Bowls Club" width={44} height={44} className="rounded-full dark:bg-white" />
             <span className="font-bold text-lg text-slate-800 dark:text-slate-100">Ferndown Bowls Club</span>
           </Link>
 
