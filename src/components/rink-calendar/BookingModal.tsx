@@ -266,14 +266,18 @@ export function BookingModal({
                         onChange={(e) => setMemberSearch(e.target.value)}
                         className="w-full h-11 text-base px-3 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 outline-none focus:border-slate-400 dark:focus:border-slate-500"
                       />
-                      <ul className="max-h-44 overflow-y-auto rounded-md border border-slate-200 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-800">
+                      <ul className="max-h-44 overflow-y-auto rounded-md border border-slate-200 dark:border-slate-700">
                         {filteredMembers.length === 0 ? (
                           <li className="px-3 py-4 text-sm text-slate-400 dark:text-slate-500 text-center">No members found</li>
-                        ) : filteredMembers.map((m) => (
+                        ) : filteredMembers.map((m, i) => (
                           <li key={m.id}>
                             <button
                               onClick={() => addMemberById(m.id)}
-                              className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100 transition-colors"
+                              className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors hover:brightness-95 active:brightness-90 ${
+                                i % 2 === 0
+                                  ? 'bg-white dark:bg-slate-900'
+                                  : 'bg-slate-50 dark:bg-slate-800/60'
+                              }`}
                             >
                               <UserPlus size={15} className="text-slate-400 dark:text-slate-500 shrink-0" />
                               <div className="min-w-0">
