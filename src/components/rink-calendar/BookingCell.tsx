@@ -62,21 +62,21 @@ export function BookingCell({ booking, canEdit, showPlayers, onClick }: Props) {
       <TooltipTrigger asChild>{cell}</TooltipTrigger>
       <TooltipContent
         side="right"
-        className="p-0 max-w-[220px] bg-white text-slate-800 border border-slate-200 shadow-lg rounded-lg overflow-hidden"
+        className="p-0 max-w-[220px] bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-700 shadow-lg rounded-lg overflow-hidden"
       >
-        <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-2">
-          <Users size={14} className="text-slate-400" />
-          <span className="text-sm font-bold text-slate-700">
+        <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center gap-2">
+          <Users size={14} className="text-slate-400 dark:text-slate-500" />
+          <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
             {playerCount} {playerCount === 1 ? 'player' : 'players'}
           </span>
         </div>
         <ul className="py-1 max-h-60 overflow-y-auto">
           {booking.players.map((p) => (
             <li key={p.id} className="flex items-center justify-between gap-3 px-4 py-2">
-              <span className="text-sm text-slate-800 font-medium">{p.name}</span>
+              <span className="text-sm text-slate-800 dark:text-slate-200 font-medium">{p.name}</span>
               <span className={cn(
                 'text-xs shrink-0 font-medium',
-                p.userId ? 'text-slate-500' : 'text-slate-400'
+                p.userId ? 'text-slate-500 dark:text-slate-400' : 'text-slate-400 dark:text-slate-500'
               )}>
                 {p.userId ? 'Member' : 'Guest'}
               </span>

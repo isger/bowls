@@ -87,8 +87,8 @@ export default function MembersPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Members</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Manage club member accounts</p>
+          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Members</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Manage club member accounts</p>
         </div>
         <Button size="sm" onClick={openModal}>
           <UserPlus size={16} className="mr-2" />
@@ -96,24 +96,24 @@ export default function MembersPage() {
         </Button>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-slate-400">Loading…</div>
+          <div className="p-8 text-center text-slate-400 dark:text-slate-500">Loading…</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 border-b border-slate-200">
+            <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-slate-500">Name</th>
-                <th className="text-left px-4 py-3 font-medium text-slate-500">Email</th>
-                <th className="text-left px-4 py-3 font-medium text-slate-500">Role</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-500 dark:text-slate-400">Name</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-500 dark:text-slate-400">Email</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-500 dark:text-slate-400">Role</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {members.map((m) => (
-                <tr key={m.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-3 font-medium text-slate-800">{m.name}</td>
-                  <td className="px-4 py-3 text-slate-600">{m.email}</td>
+                <tr key={m.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200">{m.name}</td>
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{m.email}</td>
                   <td className="px-4 py-3">
                     <Badge variant={m.role === 'admin' ? 'default' : 'secondary'}>{m.role}</Badge>
                   </td>
@@ -136,7 +136,7 @@ export default function MembersPage() {
               ))}
               {members.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-slate-400">
+                  <td colSpan={4} className="px-4 py-8 text-center text-slate-400 dark:text-slate-500">
                     No members yet
                   </td>
                 </tr>

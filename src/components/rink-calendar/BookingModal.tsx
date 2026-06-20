@@ -176,7 +176,7 @@ export function BookingModal({
 
           {/* Conflict warning */}
           {conflictingBooking && (
-            <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-base text-amber-800">
+            <div className="flex items-start gap-3 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 px-4 py-3 text-base text-amber-800 dark:text-amber-300">
               <AlertCircle size={18} className="shrink-0 mt-0.5 text-amber-500" />
               <span>
                 This slot is already booked: <span className="font-semibold">{conflictingBooking.title}</span>
@@ -216,16 +216,16 @@ export function BookingModal({
             {players.length > 0 && (
               <ul className="space-y-1.5 max-h-44 overflow-y-auto">
                 {players.map((p, i) => (
-                  <li key={i} className="flex items-center justify-between gap-2 py-2 px-3 rounded-lg bg-slate-50 border border-slate-200">
+                  <li key={i} className="flex items-center justify-between gap-2 py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                     <div className="flex items-center gap-2 min-w-0">
-                      <User size={15} className="text-slate-400 shrink-0" />
+                      <User size={15} className="text-slate-400 dark:text-slate-500 shrink-0" />
                       <span className="truncate text-base font-medium">{p.name}</span>
                       {p.userId
                         ? <Badge variant="secondary" className="text-xs shrink-0">Member</Badge>
                         : <Badge variant="outline" className="text-xs shrink-0">Guest</Badge>
                       }
                     </div>
-                    <button onClick={() => removePlayer(i)} className="text-slate-400 hover:text-red-500 shrink-0 p-1">
+                    <button onClick={() => removePlayer(i)} className="text-slate-400 dark:text-slate-500 hover:text-red-500 shrink-0 p-1">
                       <X size={16} />
                     </button>
                   </li>
@@ -235,16 +235,16 @@ export function BookingModal({
 
             {/* Add player controls */}
             <div className="space-y-3">
-              <div className="flex rounded-lg border-2 border-slate-200 overflow-hidden text-sm w-fit">
+              <div className="flex rounded-lg border-2 border-slate-200 dark:border-slate-700 overflow-hidden text-sm w-fit">
                 <button
                   onClick={() => setAddMode('member')}
-                  className={`px-4 py-2 font-semibold transition-colors ${addMode === 'member' ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-50'}`}
+                  className={`px-4 py-2 font-semibold transition-colors ${addMode === 'member' ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
                 >
                   Add Member
                 </button>
                 <button
                   onClick={() => setAddMode('guest')}
-                  className={`px-4 py-2 font-semibold transition-colors ${addMode === 'guest' ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-50'}`}
+                  className={`px-4 py-2 font-semibold transition-colors ${addMode === 'guest' ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
                 >
                   Add Guest
                 </button>

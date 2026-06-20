@@ -147,16 +147,16 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
                   placeholder="Search players…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full text-base px-3 py-2 rounded border border-slate-200 outline-none focus:border-slate-400"
+                  className="w-full text-base px-3 py-2 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 outline-none focus:border-slate-400 dark:focus:border-slate-500"
                 />
               </div>
               <ul className="max-h-64 overflow-y-auto py-1">
                 {allPlayers.length === 0 ? (
-                  <li className="px-4 py-5 text-base text-slate-400 text-center">
+                  <li className="px-4 py-5 text-base text-slate-400 dark:text-slate-500 text-center">
                     No players on this day
                   </li>
                 ) : visiblePlayers.length === 0 ? (
-                  <li className="px-4 py-3 text-base text-slate-400">No players found</li>
+                  <li className="px-4 py-3 text-base text-slate-400 dark:text-slate-500">No players found</li>
                 ) : (
                   visiblePlayers.map((p) => {
                     const checked = activeFilters.has(p.key)
@@ -164,13 +164,13 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
                       <li key={p.key}>
                         <button
                           onClick={() => toggleFilter(p.key)}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-base hover:bg-slate-50 text-left"
+                          className="w-full flex items-center gap-3 px-4 py-3 text-base hover:bg-slate-50 dark:hover:bg-slate-800 text-left"
                         >
                           <span className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 ${checked ? 'bg-slate-800 border-slate-800' : 'border-slate-300'}`}>
                             {checked && <svg width="11" height="9" viewBox="0 0 10 8" fill="none"><path d="M1 4l3 3 5-6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
                           </span>
                           <span className="flex-1 truncate font-medium">{p.name}</span>
-                          {p.isMember && <span className="text-sm text-slate-400 shrink-0">Member</span>}
+                          {p.isMember && <span className="text-sm text-slate-400 dark:text-slate-500 shrink-0">Member</span>}
                         </button>
                       </li>
                     )
@@ -179,7 +179,7 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
               </ul>
               {activeFilters.size > 0 && (
                 <div className="p-3 border-t border-slate-100">
-                  <button onClick={clearFilters} className="w-full text-sm font-medium text-slate-500 hover:text-slate-700 py-1">
+                  <button onClick={clearFilters} className="w-full text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 py-1">
                     Clear all filters
                   </button>
                 </div>
@@ -205,7 +205,7 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
         {Object.entries(BOOKING_TYPE_CONFIG).map(([type, config]) => (
           <div key={type} className="flex items-center gap-2">
             <div className={`w-3 h-3 rounded-full shrink-0 ${config.bg} opacity-70`} />
-            <span className="text-sm text-slate-500">{config.label}</span>
+            <span className="text-sm text-slate-500 dark:text-slate-400">{config.label}</span>
           </div>
         ))}
       </div>
@@ -213,7 +213,7 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
       {/* Active filter chips — hidden in print */}
       {activeFilterPlayers.length > 0 && (
         <div className="print:hidden flex flex-wrap items-center gap-2">
-          <span className="text-sm font-medium text-slate-500">Showing:</span>
+          <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Showing:</span>
           {activeFilterPlayers.map((p) => (
             <button
               key={p.key}
@@ -224,7 +224,7 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
               <X size={13} className="opacity-70" />
             </button>
           ))}
-          <button onClick={clearFilters} className="text-sm text-slate-400 hover:text-slate-600 underline">
+          <button onClick={clearFilters} className="text-sm text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 underline">
             Clear
           </button>
         </div>
@@ -236,8 +236,8 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
           onClick={() => setSelectedRinkId(null)}
           className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
             selectedRinkId === null
-              ? 'bg-slate-800 text-white'
-              : 'bg-slate-100 text-slate-600 active:bg-slate-200'
+              ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900'
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 active:bg-slate-200 dark:active:bg-slate-700'
           }`}
         >
           All rinks
@@ -248,8 +248,8 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
             onClick={() => setSelectedRinkId(rink.id)}
             className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
               selectedRinkId === rink.id
-                ? 'bg-slate-800 text-white'
-                : 'bg-slate-100 text-slate-600 active:bg-slate-200'
+                ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 active:bg-slate-200 dark:active:bg-slate-700'
             }`}
           >
             {rink.label ?? `Rink ${rink.number}`}
@@ -257,7 +257,7 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
         ))}
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
         <CalendarGrid
           rinks={selectedRinkId ? rinks.filter((r) => r.id === selectedRinkId) : rinks}
           timeSlots={timeSlots}

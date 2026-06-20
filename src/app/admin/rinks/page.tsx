@@ -77,8 +77,8 @@ export default function RinksPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900">Rinks</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Configure the club rinks shown on the diary</p>
+          <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Rinks</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Configure the club rinks shown on the diary</p>
         </div>
         <Button size="sm" onClick={openModal}>
           <Plus size={16} className="mr-2" />
@@ -86,24 +86,24 @@ export default function RinksPage() {
         </Button>
       </div>
 
-      <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-slate-400">Loading…</div>
+          <div className="p-8 text-center text-slate-400 dark:text-slate-500">Loading…</div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 border-b border-slate-200">
+            <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
               <tr>
-                <th className="text-left px-4 py-3 font-medium text-slate-500">Number</th>
-                <th className="text-left px-4 py-3 font-medium text-slate-500">Label</th>
-                <th className="text-left px-4 py-3 font-medium text-slate-500">Status</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-500 dark:text-slate-400">Number</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-500 dark:text-slate-400">Label</th>
+                <th className="text-left px-4 py-3 font-medium text-slate-500 dark:text-slate-400">Status</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {rinks.map((r) => (
-                <tr key={r.id} className="hover:bg-slate-50">
-                  <td className="px-4 py-3 font-medium text-slate-800">{r.number}</td>
-                  <td className="px-4 py-3 text-slate-600">{r.label ?? '—'}</td>
+                <tr key={r.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200">{r.number}</td>
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{r.label ?? '—'}</td>
                   <td className="px-4 py-3">
                     <Badge variant={r.isActive ? 'default' : 'secondary'}>
                       {r.isActive ? 'Active' : 'Inactive'}
@@ -123,7 +123,7 @@ export default function RinksPage() {
               ))}
               {rinks.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-slate-400">
+                  <td colSpan={4} className="px-4 py-8 text-center text-slate-400 dark:text-slate-500">
                     No rinks configured yet
                   </td>
                 </tr>
