@@ -6,8 +6,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
 export async function GET() {
-  const rows = await db.select().from(bookingDurations).orderBy(asc(bookingDurations.duration))
-  return NextResponse.json({ durations: rows.map((r) => r.duration) })
+  try {
+    const rows = await db.select().from(bookingDurations).orderBy(asc(bookingDurations.duration))
+    return NextResponse.json({ durations: rows.map((r) => r.duration) })
+  } catch {
+    return NextResponse.json({ durations: [] })
+  }
 }
 
 export async function POST(req: NextRequest) {
