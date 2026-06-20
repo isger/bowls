@@ -20,6 +20,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
           {children}
         </main>
+        <footer className="print:hidden border-t border-slate-200 bg-white mt-auto">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-slate-500">
+            <span>&copy; {new Date().getFullYear()} Ferndown Bowls Club. All rights reserved.</span>
+            <span>Rink booking &amp; club management</span>
+          </div>
+        </footer>
       </body>
     </html>
   )
