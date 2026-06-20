@@ -35,6 +35,11 @@ export default function ConfigPage() {
   // Time slots state
   const [slots, setSlots] = useState<TimeSlot[]>([])
   const [slotsLoading, setSlotsLoading] = useState(true)
+
+  // Durations state
+  const [enabledDurations, setEnabledDurations] = useState<Set<number>>(new Set())
+  const [durationsLoading, setDurationsLoading] = useState(true)
+  const [togglingDuration, setTogglingDuration] = useState<number | null>(null)
   const [slotModalOpen, setSlotModalOpen] = useState(false)
   const [startTime, setStartTime] = useState('')
   const [endTime, setEndTime] = useState('')
@@ -52,6 +57,11 @@ export default function ConfigPage() {
       .then((r) => r.json())
       .then((d) => setSlots(d.timeSlots ?? []))
       .finally(() => setSlotsLoading(false))
+
+    fetch('/api/durations')
+      .then((r) => r.json())
+      .then((d) => setEnabledDurations(new Set(d.durations ?? [])))
+      .finally(() => setDurationsLoading(false))
   }, [])
 
   // Rink handlers
@@ -94,6 +104,26 @@ export default function ConfigPage() {
     if (res.ok) {
       const data = await res.json()
       setRinks((prev) => prev.map((r) => (r.id === rink.id ? data.rink : r)))
+    }
+  }
+
+  // Duration handlers
+  async function toggleDuration(d: number) {
+    setTogglingDuration(d)
+    try {
+      if (enabledDurations.has(d)) {
+        const res = await fetch(`/api/durations/${d}`, { method: 'DELETE' })
+        if (res.ok) setEnabledDurations((prev) => { const next = new Set(prev); next.delete(d); return next })
+      } else {
+        const res = await fetch('/api/durations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ duration: d }),
+        })
+        if (res.ok) setEnabledDurations((prev) => new Set([...prev, d]))
+      }
+    } finally {
+      setTogglingDuration(null)
     }
   }
 
@@ -258,6 +288,44 @@ export default function ConfigPage() {
                 )}
               </tbody>
             </table>
+          )}
+        </div>
+      </section>
+
+      {/* Booking Durations */}
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">Booking Durations</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Select which durations are available when creating a booking</p>
+        </div>
+
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm p-4">
+          {durationsLoading ? (
+            <div className="flex items-center gap-2 text-slate-400 dark:text-slate-500 text-sm">
+              <Loader2 size={14} className="animate-spin" /> Loading…
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {Array.from({ length: 12 }, (_, i) => i + 1).map((d) => {
+                const enabled = enabledDurations.has(d)
+                const toggling = togglingDuration === d
+                return (
+                  <button
+                    key={d}
+                    onClick={() => toggleDuration(d)}
+                    disabled={toggling}
+                    className={[
+                      'px-4 py-2 rounded-md text-sm font-medium border transition-colors disabled:opacity-50',
+                      enabled
+                        ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-slate-800 dark:border-slate-200'
+                        : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500',
+                    ].join(' ')}
+                  >
+                    {toggling ? <Loader2 size={14} className="animate-spin inline" /> : `${d}h`}
+                  </button>
+                )
+              })}
+            </div>
           )}
         </div>
       </section>

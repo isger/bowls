@@ -44,6 +44,10 @@ export const bookings = sqliteTable(
   (t) => [unique().on(t.date, t.rinkId, t.timeSlotId)]
 )
 
+export const bookingDurations = sqliteTable('booking_durations', {
+  duration: integer('duration').primaryKey(),
+})
+
 export const bookingPlayers = sqliteTable('booking_players', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   bookingId: integer('booking_id').notNull().references(() => bookings.id, { onDelete: 'cascade' }),
@@ -51,6 +55,7 @@ export const bookingPlayers = sqliteTable('booking_players', {
   name: text('name').notNull(),
 })
 
+export type BookingDuration = typeof bookingDurations.$inferSelect
 export type User = typeof users.$inferSelect
 export type Rink = typeof rinks.$inferSelect
 export type TimeSlot = typeof timeSlots.$inferSelect

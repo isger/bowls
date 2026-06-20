@@ -63,6 +63,8 @@ export function BookingModal({
   const [memberSearch, setMemberSearch] = useState('')
   const [members, setMembers] = useState<Member[]>([])
   const [membersLoaded, setMembersLoaded] = useState(false)
+  const [allowedDurations, setAllowedDurations] = useState<number[]>([])
+  const [durationsLoaded, setDurationsLoaded] = useState(false)
 
   useEffect(() => {
     if (open) {
@@ -83,6 +85,18 @@ export function BookingModal({
         fetch('/api/members')
           .then((r) => r.json())
           .then((d) => { setMembers(d.members ?? []); setMembersLoaded(true) })
+      }
+      if (!durationsLoaded) {
+        fetch('/api/durations')
+          .then((r) => r.json())
+          .then((d) => {
+            const durations: number[] = d.durations ?? []
+            setAllowedDurations(durations)
+            setDurationsLoaded(true)
+            if (durations.length > 0 && !durations.includes(existing?.durationSlots ?? 1)) {
+              setDurationSlots(durations[0])
+            }
+          })
       }
     }
   }, [open, existing, rinkId, timeSlotId])
@@ -207,7 +221,7 @@ export function BookingModal({
           </div>
 
           {/* Duration */}
-          {!existing && (
+          {!existing && allowedDurations.length > 0 && (
             <div className="space-y-2">
               <Label className="text-base font-semibold">Duration</Label>
               <Select
@@ -223,15 +237,17 @@ export function BookingModal({
                       ? timeSlots.findIndex((s) => s.id === selectedSlotId)
                       : -1
                     const maxDuration = startIdx >= 0 ? timeSlots.length - startIdx : 12
-                    return Array.from({ length: Math.min(12, maxDuration) }, (_, i) => i + 1).map((d) => {
-                      const endSlot = startIdx >= 0 ? timeSlots[startIdx + d - 1] : null
-                      return (
-                        <SelectItem key={d} value={d.toString()} className="text-base py-2">
-                          {d === 1 ? '1 Hour' : `${d} Hours`}
-                          {endSlot ? ` (until ${endSlot.endTime})` : ''}
-                        </SelectItem>
-                      )
-                    })
+                    return allowedDurations
+                      .filter((d) => d <= maxDuration)
+                      .map((d) => {
+                        const endSlot = startIdx >= 0 ? timeSlots[startIdx + d - 1] : null
+                        return (
+                          <SelectItem key={d} value={d.toString()} className="text-base py-2">
+                            {d === 1 ? '1 Hour' : `${d} Hours`}
+                            {endSlot ? ` (until ${endSlot.endTime})` : ''}
+                          </SelectItem>
+                        )
+                      })
                   })()}
                 </SelectContent>
               </Select>
