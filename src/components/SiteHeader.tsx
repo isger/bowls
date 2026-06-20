@@ -16,7 +16,7 @@ export async function SiteHeader() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 shrink-0">
             <Image src="/logo.png" alt="Ferndown Bowls Club" width={44} height={44} className="rounded-full" />
-            <span className="font-bold text-lg text-slate-800 hidden sm:block">Ferndown Bowls Club</span>
+            <span className="font-bold text-lg text-slate-800">Ferndown Bowls Club</span>
           </Link>
 
           {/* Desktop nav */}
