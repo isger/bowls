@@ -107,6 +107,14 @@ function LoginForm() {
             Continue without signing in
           </Link>
         </p>
+
+        <p className="text-xs text-center text-slate-400 leading-relaxed">
+          By signing in you acknowledge that we store your name and email
+          address in accordance with our{' '}
+          <Link href="/privacy" className="underline hover:text-slate-600">
+            Privacy Notice
+          </Link>.
+        </p>
       </div>
     </div>
   )

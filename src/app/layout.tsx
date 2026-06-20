@@ -51,8 +51,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </a>
               </div>
 
-              <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-400 dark:text-slate-500 text-center sm:text-left">
-                &copy; {new Date().getFullYear()} Ferndown Bowls Club. All rights reserved.
+              <div className="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center sm:items-center justify-between gap-2 text-xs text-slate-400 dark:text-slate-500">
+                <span>&copy; {new Date().getFullYear()} Ferndown Bowls Club. All rights reserved.</span>
+                <a href="/privacy" className="underline underline-offset-2 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
+                  Privacy Notice
+                </a>
               </div>
             </div>
           </footer>
