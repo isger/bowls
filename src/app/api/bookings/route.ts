@@ -14,7 +14,7 @@ const createSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   rinkId: z.number().int().positive(),
   timeSlotId: z.number().int().positive(),
-  durationSlots: z.number().int().min(1).max(3).default(1),
+  durationSlots: z.number().int().min(1).max(12).default(1),
   type: z.enum(['roll-up', 'competition', 'league', 'open-play', 'private']),
   title: z.string().min(1).max(100),
   notes: z.string().max(500).optional(),

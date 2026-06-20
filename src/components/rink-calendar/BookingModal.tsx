@@ -218,19 +218,21 @@ export function BookingModal({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {[1, 2, 3].map((d) => {
+                  {(() => {
                     const startIdx = selectedSlotId
                       ? timeSlots.findIndex((s) => s.id === selectedSlotId)
                       : -1
-                    const endSlot = startIdx >= 0 ? timeSlots[startIdx + d - 1] : null
-                    const disabled = startIdx >= 0 && startIdx + d > timeSlots.length
-                    return (
-                      <SelectItem key={d} value={d.toString()} disabled={disabled} className="text-base py-2">
-                        {d === 1 ? '1 Hour' : `${d} Hours`}
-                        {endSlot ? ` (until ${endSlot.endTime})` : ''}
-                      </SelectItem>
-                    )
-                  })}
+                    const maxDuration = startIdx >= 0 ? timeSlots.length - startIdx : 12
+                    return Array.from({ length: Math.min(12, maxDuration) }, (_, i) => i + 1).map((d) => {
+                      const endSlot = startIdx >= 0 ? timeSlots[startIdx + d - 1] : null
+                      return (
+                        <SelectItem key={d} value={d.toString()} className="text-base py-2">
+                          {d === 1 ? '1 Hour' : `${d} Hours`}
+                          {endSlot ? ` (until ${endSlot.endTime})` : ''}
+                        </SelectItem>
+                      )
+                    })
+                  })()}
                 </SelectContent>
               </Select>
             </div>
