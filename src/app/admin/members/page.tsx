@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { UserPlus, Loader2, Trash2, Search, ChevronLeft, ChevronRight } from 'lucide-react'
+import { UserPlus, Loader2, Trash2, Search, ChevronLeft, ChevronRight, Printer, FileSpreadsheet } from 'lucide-react'
 import { useEffect, useState, useMemo } from 'react'
 
 interface Member {
@@ -133,20 +133,47 @@ export default function MembersPage() {
     }
   }
 
+  function handleExportCsv() {
+    const rows = [
+      ['#', 'Name', 'Email'],
+      ...filtered.map((m, i) => [i + 1, m.name, m.email]),
+    ]
+    const csv = rows.map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\r\n')
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `ferndown-bowls-members-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const printDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Members</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Manage club member accounts</p>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 print:hidden">Manage club member accounts</p>
         </div>
-        <Button size="sm" onClick={openModal}>
-          <UserPlus size={16} className="mr-2" />
-          Add member
-        </Button>
+        <div className="flex items-center gap-2 print:hidden">
+          <Button size="sm" variant="outline" onClick={() => window.print()} disabled={loading}>
+            <Printer size={15} className="mr-1.5" />
+            Print
+          </Button>
+          <Button size="sm" variant="outline" onClick={handleExportCsv} disabled={loading || filtered.length === 0}>
+            <FileSpreadsheet size={15} className="mr-1.5" />
+            Export to Excel
+          </Button>
+          <Button size="sm" onClick={openModal}>
+            <UserPlus size={16} className="mr-1.5" />
+            Add member
+          </Button>
+        </div>
       </div>
 
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4 print:hidden">
         <div className="relative w-72">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
           <Input
@@ -166,7 +193,7 @@ export default function MembersPage() {
         )}
       </div>
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm overflow-hidden">
+      <div className="print:hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm overflow-hidden">
         {loading ? (
           <div className="p-8 text-center text-slate-400 dark:text-slate-500">Loading…</div>
         ) : (
@@ -219,9 +246,40 @@ export default function MembersPage() {
         )}
       </div>
 
+      {/* Print-only table — all filtered members, no role column */}
+      {!loading && (
+        <div className="hidden print:block">
+          <p className="text-sm text-slate-500 mb-6">
+            Printed {printDate}
+            {search && ` · filtered by "${search}" (${filtered.length} result${filtered.length !== 1 ? 's' : ''})`}
+          </p>
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="border-b-2 border-slate-800">
+                <th className="text-left py-2 pr-6 font-bold text-slate-800 w-10">#</th>
+                <th className="text-left py-2 pr-6 font-bold text-slate-800">Name</th>
+                <th className="text-left py-2 font-bold text-slate-800">Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((m, i) => (
+                <tr key={m.id} className={`border-b border-slate-200 ${i % 2 !== 0 ? 'bg-slate-50' : ''}`}>
+                  <td className="py-1.5 pr-6 text-slate-400 tabular-nums">{i + 1}</td>
+                  <td className="py-1.5 pr-6 font-medium text-slate-900">{m.name}</td>
+                  <td className="py-1.5 text-slate-600">{m.email}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="mt-4 text-xs text-slate-400">
+            {filtered.length} member{filtered.length !== 1 ? 's' : ''} total
+          </p>
+        </div>
+      )}
+
       {/* Pagination */}
       {!loading && filtered.length > PAGE_SIZE && (
-        <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+        <div className="print:hidden flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
           <span>
             {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filtered.length)} of {filtered.length}
           </span>
