@@ -37,13 +37,18 @@ export function BookingCell({ booking, canEdit, showPlayers, onClick }: Props) {
         </span>
       )}
       {playerCount > 0 && (
-        <span className="flex items-center gap-1.5 text-xs mt-2 opacity-90 font-medium">
+        <span className="print:hidden flex items-center gap-1.5 text-xs mt-2 opacity-90 font-medium">
           <Users size={12} />
           {playerCount} {playerCount === 1 ? 'player' : 'players'}
         </span>
       )}
+      {playerCount > 0 && (
+        <span className="hidden print:block text-xs mt-2 opacity-90 leading-snug font-medium">
+          {booking.players.map((p) => p.name).join(', ')}
+        </span>
+      )}
       {canEdit && (
-        <span className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <span className="print:hidden absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
           <Pencil size={14} />
         </span>
       )}

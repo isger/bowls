@@ -21,7 +21,7 @@ export function CalendarGrid({ rinks, timeSlots, bookings, canCreate, canEditBoo
   return (
     <div className="overflow-x-auto">
       <div
-        className="grid min-w-[500px]"
+        className="grid min-w-[500px] print:min-w-0"
         style={{
           gridTemplateColumns: `70px repeat(${rinks.length}, minmax(110px, 1fr))`,
         }}
@@ -65,7 +65,7 @@ export function CalendarGrid({ rinks, timeSlots, bookings, canCreate, canEditBoo
                   ) : canCreate ? (
                     <button
                       onClick={() => onCellClick(rink.id, slot.id)}
-                      className="w-full h-full min-h-[90px] rounded border-2 border-dashed border-slate-300 text-slate-400 hover:border-slate-500 hover:text-slate-600 hover:bg-slate-50 transition-colors flex items-center justify-center text-xs font-medium text-center px-1"
+                      className="print:hidden w-full h-full min-h-[90px] rounded border-2 border-dashed border-slate-300 text-slate-400 hover:border-slate-500 hover:text-slate-600 hover:bg-slate-50 transition-colors flex items-center justify-center text-xs font-medium text-center px-1"
                     >
                       + Book
                     </button>

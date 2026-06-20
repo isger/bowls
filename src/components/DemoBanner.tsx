@@ -8,7 +8,7 @@ export function DemoBanner() {
   if (dismissed) return null
 
   return (
-    <div className="bg-amber-400 text-amber-950 py-2 px-4 flex items-center justify-center gap-3 text-sm font-semibold tracking-wide">
+    <div className="print:hidden bg-amber-400 text-amber-950 py-2 px-4 flex items-center justify-center gap-3 text-sm font-semibold tracking-wide">
       <span>This is a demo. Data may be reset at any time.</span>
       <button
         onClick={() => setDismissed(true)}

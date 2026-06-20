@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { BOOKING_TYPE_CONFIG } from '@/lib/booking-types'
-import { Plus, SlidersHorizontal, X } from 'lucide-react'
+import { Plus, Printer, SlidersHorizontal, X } from 'lucide-react'
 
 interface Props {
   date: string
@@ -98,20 +98,30 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
 
   const activeFilterPlayers = allPlayers.filter((p) => activeFilters.has(p.key))
 
+  const formattedDate = new Date(`${date}T12:00:00`).toLocaleDateString('en-GB', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+  })
+
   return (
     <TooltipProvider delayDuration={300}>
     <div className="space-y-4">
-      {/* Header row */}
-      <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
-        <DateNav date={date} />
-        <div className="hidden md:flex flex-wrap items-center gap-4 flex-1">
+      {/* Print-only header */}
+      <div className="hidden print:block mb-2">
+        <h1 className="text-2xl font-bold text-slate-800">Ferndown Bowls Club</h1>
+        <p className="text-lg text-slate-600 mt-0.5">Rink Bookings — {formattedDate}</p>
+        <div className="flex flex-wrap items-center gap-4 mt-2 pt-2 border-t border-slate-200">
           {Object.entries(BOOKING_TYPE_CONFIG).map(([type, config]) => (
-            <div key={type} className="flex items-center gap-2">
-              <div className={`w-4 h-4 rounded ${config.bg}`} />
-              <span className="text-sm font-medium text-slate-600">{config.label}</span>
+            <div key={type} className="flex items-center gap-1.5">
+              <div className={`w-3.5 h-3.5 rounded ${config.bg}`} />
+              <span className="text-sm text-slate-600">{config.label}</span>
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Header row — hidden in print */}
+      <div className="print:hidden flex flex-col sm:flex-row sm:items-center gap-3">
+        <DateNav date={date} />
         <div className="flex items-center gap-2 sm:ml-auto">
           {/* Player filter */}
           <Popover open={filterOpen} onOpenChange={setFilterOpen}>
@@ -182,12 +192,26 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
               New Booking
             </Button>
           )}
+          <Button variant="outline" onClick={() => window.print()} className="gap-2">
+            <Printer size={16} />
+            Print
+          </Button>
         </div>
       </div>
 
-      {/* Active filter chips */}
+      {/* Legend row — hidden on mobile and in print */}
+      <div className="hidden md:flex print:hidden items-center gap-x-6 gap-y-1.5 flex-wrap -mt-1">
+        {Object.entries(BOOKING_TYPE_CONFIG).map(([type, config]) => (
+          <div key={type} className="flex items-center gap-2">
+            <div className={`w-3 h-3 rounded-full shrink-0 ${config.bg} opacity-70`} />
+            <span className="text-sm text-slate-500">{config.label}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Active filter chips — hidden in print */}
       {activeFilterPlayers.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="print:hidden flex flex-wrap items-center gap-2">
           <span className="text-sm font-medium text-slate-500">Showing:</span>
           {activeFilterPlayers.map((p) => (
             <button
