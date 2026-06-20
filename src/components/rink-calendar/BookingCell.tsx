@@ -43,13 +43,17 @@ export function BookingCell({ booking, canEdit, showPlayers, onClick }: Props) {
         </span>
       )}
       {playerCount > 0 && (
-        <ol className="hidden print:block mt-2 pl-3.5 space-y-0.5">
-          {booking.players.map((p) => (
-            <li key={p.id} className="text-[10px] font-medium opacity-90 leading-tight list-decimal">
-              {p.name}
-            </li>
+        <div className="hidden print:block mt-2 rounded overflow-hidden border border-white/30">
+          {booking.players.map((p, i) => (
+            <div
+              key={p.id}
+              className={`flex items-center gap-1.5 px-1.5 py-[3px] ${i % 2 === 0 ? 'bg-white/90' : 'bg-white/60'}`}
+            >
+              <span className="text-[8px] font-bold text-slate-400 w-3 shrink-0 tabular-nums">{i + 1}</span>
+              <span className="text-[10px] font-semibold text-slate-800 leading-tight">{p.name}</span>
+            </div>
           ))}
-        </ol>
+        </div>
       )}
       {canEdit && (
         <span className="print:hidden absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
