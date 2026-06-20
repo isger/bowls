@@ -18,9 +18,22 @@ function LoginForm() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({})
+
+  function validateEmail(v: string) {
+    if (!v.trim()) return 'Email is required'
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return 'Enter a valid email address'
+  }
+
+  function validatePassword(v: string) {
+    if (!v) return 'Password is required'
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    const errs = { email: validateEmail(email), password: validatePassword(password) }
+    setFieldErrors(errs)
+    if (errs.email || errs.password) return
     setLoading(true)
     setError(null)
     const result = await signIn('credentials', {
@@ -56,11 +69,12 @@ function LoginForm() {
               type="email"
               autoComplete="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => { setEmail(e.target.value); setFieldErrors((p) => ({ ...p, email: undefined })) }}
+              onBlur={(e) => setFieldErrors((p) => ({ ...p, email: validateEmail(e.target.value) }))}
               placeholder="you@example.com"
-              className="h-12 text-base"
-              required
+              className={`h-12 text-base ${fieldErrors.email ? 'border-red-400 focus-visible:ring-red-400' : ''}`}
             />
+            {fieldErrors.email && <p className="text-sm text-red-600">{fieldErrors.email}</p>}
           </div>
           <div className="space-y-2">
             <Label htmlFor="password" className="text-base font-semibold">Password</Label>
@@ -69,10 +83,11 @@ function LoginForm() {
               type="password"
               autoComplete="current-password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="h-12 text-base"
-              required
+              onChange={(e) => { setPassword(e.target.value); setFieldErrors((p) => ({ ...p, password: undefined })) }}
+              onBlur={(e) => setFieldErrors((p) => ({ ...p, password: validatePassword(e.target.value) }))}
+              className={`h-12 text-base ${fieldErrors.password ? 'border-red-400 focus-visible:ring-red-400' : ''}`}
             />
+            {fieldErrors.password && <p className="text-sm text-red-600">{fieldErrors.password}</p>}
           </div>
 
           {error && (

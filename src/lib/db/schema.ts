@@ -36,6 +36,7 @@ export const bookings = sqliteTable(
     }).notNull(),
     title: text('title').notNull(),
     notes: text('notes'),
+    durationSlots: integer('duration_slots').notNull().default(1),
     createdBy: text('created_by').notNull().references(() => users.id),
     createdAt: integer('created_at').notNull().default(sql`(unixepoch() * 1000)`),
     updatedAt: integer('updated_at').notNull().default(sql`(unixepoch() * 1000)`),

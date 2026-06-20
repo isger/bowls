@@ -39,12 +39,18 @@ async function seed() {
   ])
 
   await db.insert(schema.timeSlots).values([
-    { startTime: '08:00', endTime: '10:00', sortOrder: 1 },
-    { startTime: '10:00', endTime: '12:00', sortOrder: 2 },
-    { startTime: '12:00', endTime: '14:00', sortOrder: 3 },
-    { startTime: '14:00', endTime: '16:00', sortOrder: 4 },
-    { startTime: '16:00', endTime: '18:00', sortOrder: 5 },
-    { startTime: '18:00', endTime: '20:00', sortOrder: 6 },
+    { startTime: '08:00', endTime: '09:00', sortOrder: 1 },
+    { startTime: '09:00', endTime: '10:00', sortOrder: 2 },
+    { startTime: '10:00', endTime: '11:00', sortOrder: 3 },
+    { startTime: '11:00', endTime: '12:00', sortOrder: 4 },
+    { startTime: '12:00', endTime: '13:00', sortOrder: 5 },
+    { startTime: '13:00', endTime: '14:00', sortOrder: 6 },
+    { startTime: '14:00', endTime: '15:00', sortOrder: 7 },
+    { startTime: '15:00', endTime: '16:00', sortOrder: 8 },
+    { startTime: '16:00', endTime: '17:00', sortOrder: 9 },
+    { startTime: '17:00', endTime: '18:00', sortOrder: 10 },
+    { startTime: '18:00', endTime: '19:00', sortOrder: 11 },
+    { startTime: '19:00', endTime: '20:00', sortOrder: 12 },
   ])
 
   const rinks = await db.select().from(schema.rinks).orderBy(schema.rinks.number)
@@ -53,36 +59,42 @@ async function seed() {
   const today = format(new Date(), 'yyyy-MM-dd')
   const tomorrow = format(addDays(new Date(), 1), 'yyyy-MM-dd')
 
-  const b = (date: string, rinkIdx: number, slotIdx: number, type: schema.BookingType, title: string) => ({
+  const b = (
+    date: string, rinkIdx: number, slotIdx: number,
+    type: schema.BookingType, title: string, durationSlots = 1
+  ) => ({
     date,
     rinkId: rinks[rinkIdx].id,
     timeSlotId: slots[slotIdx].id,
     type,
     title,
+    durationSlots,
     createdBy: adminId,
   })
 
   await db.insert(schema.bookings).values([
-    b(today, 0, 0, 'open-play',   'Open Play'),
-    b(today, 1, 0, 'roll-up',     'Club Roll-Up'),
-    b(today, 0, 1, 'roll-up',     'Club Roll-Up'),
-    b(today, 1, 1, 'league',      'Monday League'),
-    b(today, 2, 1, 'league',      'Monday League'),
-    b(today, 3, 1, 'competition', 'National Pairs'),
-    b(today, 4, 1, 'competition', 'National Pairs'),
-    b(today, 5, 1, 'roll-up',     'Club Roll-Up'),
-    b(today, 0, 3, 'private',     'Private Hire'),
-    b(today, 2, 3, 'open-play',   'Open Play'),
-    b(today, 4, 4, 'league',      'Evening League'),
-    b(today, 5, 4, 'league',      'Evening League'),
-    b(tomorrow, 0, 1, 'competition', 'Club Championship'),
-    b(tomorrow, 1, 1, 'competition', 'Club Championship'),
-    b(tomorrow, 2, 1, 'roll-up',     'Club Roll-Up'),
-    b(tomorrow, 3, 2, 'open-play',   'Open Play'),
-    b(tomorrow, 0, 4, 'league',      'Tuesday Evening League'),
+    // Today — slots 0-11 (08:00–20:00 in 1hr blocks)
+    b(today, 0, 0, 'open-play',   'Open Play',        2), // 08:00–10:00
+    b(today, 1, 0, 'roll-up',     'Club Roll-Up',     2), // 08:00–10:00
+    b(today, 0, 2, 'roll-up',     'Club Roll-Up'),        // 10:00–11:00
+    b(today, 1, 2, 'league',      'Monday League',    2), // 10:00–12:00
+    b(today, 2, 2, 'league',      'Monday League',    2), // 10:00–12:00
+    b(today, 3, 2, 'competition', 'National Pairs',   3), // 10:00–13:00
+    b(today, 4, 2, 'competition', 'National Pairs',   3), // 10:00–13:00
+    b(today, 5, 2, 'roll-up',     'Club Roll-Up'),        // 10:00–11:00
+    b(today, 0, 6, 'private',     'Private Hire',     2), // 14:00–16:00
+    b(today, 2, 6, 'open-play',   'Open Play'),           // 14:00–15:00
+    b(today, 4, 8, 'league',      'Evening League',   2), // 16:00–18:00
+    b(today, 5, 8, 'league',      'Evening League',   2), // 16:00–18:00
+    // Tomorrow
+    b(tomorrow, 0, 2, 'competition', 'Club Championship', 2),
+    b(tomorrow, 1, 2, 'competition', 'Club Championship', 2),
+    b(tomorrow, 2, 2, 'roll-up',     'Club Roll-Up'),
+    b(tomorrow, 3, 4, 'open-play',   'Open Play'),
+    b(tomorrow, 0, 8, 'league',      'Tuesday Evening League', 2),
   ])
 
-  console.log('✓ Seeded: 2 users, 6 rinks, 6 time slots, 17 bookings')
+  console.log('✓ Seeded: 2 users, 6 rinks, 12 time slots, 17 bookings')
   console.log('  admin@club.test / admin123')
   console.log('  member@club.test / member123')
   client.close()

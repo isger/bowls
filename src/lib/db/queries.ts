@@ -56,17 +56,27 @@ export async function checkBookingConflict(
   date: string,
   rinkId: number,
   timeSlotId: number,
+  durationSlots: number,
   excludeId?: number
 ) {
-  const rows = await db
-    .select({ id: bookings.id })
+  const allSlots = await db.select().from(timeSlots).orderBy(timeSlots.sortOrder)
+  const startIdx = allSlots.findIndex((s) => s.id === timeSlotId)
+  if (startIdx === -1) return false
+  const newSlotIds = new Set(
+    allSlots.slice(startIdx, startIdx + durationSlots).map((s) => s.id)
+  )
+
+  const existing = await db
+    .select({ id: bookings.id, timeSlotId: bookings.timeSlotId, durationSlots: bookings.durationSlots })
     .from(bookings)
-    .where(
-      and(
-        eq(bookings.date, date),
-        eq(bookings.rinkId, rinkId),
-        eq(bookings.timeSlotId, timeSlotId)
-      )
-    )
-  return rows.filter((r) => r.id !== excludeId).length > 0
+    .where(and(eq(bookings.date, date), eq(bookings.rinkId, rinkId)))
+
+  for (const b of existing) {
+    if (b.id === excludeId) continue
+    const bIdx = allSlots.findIndex((s) => s.id === b.timeSlotId)
+    if (bIdx === -1) continue
+    const bSlotIds = allSlots.slice(bIdx, bIdx + (b.durationSlots ?? 1)).map((s) => s.id)
+    if (bSlotIds.some((id) => newSlotIds.has(id))) return true
+  }
+  return false
 }

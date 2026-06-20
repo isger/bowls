@@ -33,6 +33,33 @@ export default function MembersPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [removingId, setRemovingId] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<{ name?: string; email?: string; password?: string }>({})
+
+  function validateField(field: 'name' | 'email' | 'password', value: string): string | undefined {
+    if (field === 'name' && !value.trim()) return 'Name is required'
+    if (field === 'email') {
+      if (!value.trim()) return 'Email is required'
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'Enter a valid email address'
+    }
+    if (field === 'password') {
+      if (!value) return 'Password is required'
+      if (value.length < 8) return 'Password must be at least 8 characters'
+    }
+  }
+
+  function blurField(field: 'name' | 'email' | 'password', value: string) {
+    setFieldErrors((prev) => ({ ...prev, [field]: validateField(field, value) }))
+  }
+
+  function validateAll() {
+    const errs = {
+      name: validateField('name', name),
+      email: validateField('email', email),
+      password: validateField('password', password),
+    }
+    setFieldErrors(errs)
+    return !errs.name && !errs.email && !errs.password
+  }
 
   useEffect(() => {
     fetch('/api/members')
@@ -80,10 +107,12 @@ export default function MembersPage() {
     setPassword('')
     setRole('member')
     setError(null)
+    setFieldErrors({})
     setModalOpen(true)
   }
 
   async function handleCreate() {
+    if (!validateAll()) return
     setSaving(true)
     setError(null)
     try {
@@ -226,15 +255,38 @@ export default function MembersPage() {
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
               <Label>Name <span className="text-red-500">*</span></Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" />
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                onBlur={(e) => blurField('name', e.target.value)}
+                placeholder="Full name"
+                className={fieldErrors.name ? 'border-red-400 focus-visible:ring-red-400' : ''}
+              />
+              {fieldErrors.name && <p className="text-xs text-red-600">{fieldErrors.name}</p>}
             </div>
             <div className="space-y-1.5">
               <Label>Email <span className="text-red-500">*</span></Label>
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@example.com" />
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onBlur={(e) => blurField('email', e.target.value)}
+                placeholder="email@example.com"
+                className={fieldErrors.email ? 'border-red-400 focus-visible:ring-red-400' : ''}
+              />
+              {fieldErrors.email && <p className="text-xs text-red-600">{fieldErrors.email}</p>}
             </div>
             <div className="space-y-1.5">
               <Label>Password <span className="text-red-500">*</span></Label>
-              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters" />
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onBlur={(e) => blurField('password', e.target.value)}
+                placeholder="Min. 8 characters"
+                className={fieldErrors.password ? 'border-red-400 focus-visible:ring-red-400' : ''}
+              />
+              {fieldErrors.password && <p className="text-xs text-red-600">{fieldErrors.password}</p>}
             </div>
             <div className="space-y-1.5">
               <Label>Role</Label>
@@ -252,7 +304,7 @@ export default function MembersPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" size="sm" onClick={() => setModalOpen(false)}>Cancel</Button>
-            <Button size="sm" onClick={handleCreate} disabled={saving || !name || !email || !password}>
+            <Button size="sm" onClick={handleCreate} disabled={saving}>
               {saving && <Loader2 size={14} className="animate-spin mr-1" />}
               Create
             </Button>

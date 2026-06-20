@@ -14,6 +14,7 @@ const createSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   rinkId: z.number().int().positive(),
   timeSlotId: z.number().int().positive(),
+  durationSlots: z.number().int().min(1).max(3).default(1),
   type: z.enum(['roll-up', 'competition', 'league', 'open-play', 'private']),
   title: z.string().min(1).max(100),
   notes: z.string().max(500).optional(),
@@ -42,9 +43,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { date, rinkId, timeSlotId, type, title, notes, players } = parsed.data
+  const { date, rinkId, timeSlotId, durationSlots, type, title, notes, players } = parsed.data
 
-  const conflict = await checkBookingConflict(date, rinkId, timeSlotId)
+  const conflict = await checkBookingConflict(date, rinkId, timeSlotId, durationSlots)
   if (conflict) {
     return NextResponse.json({ error: 'That rink and time slot is already booked' }, { status: 409 })
   }
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest) {
   try {
     const [booking] = await db
       .insert(bookings)
-      .values({ date, rinkId, timeSlotId, type, title, notes, createdBy })
+      .values({ date, rinkId, timeSlotId, durationSlots, type, title, notes, createdBy })
       .returning()
 
     const savedPlayers = players?.length

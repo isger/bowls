@@ -48,10 +48,12 @@ export function BookingModal({
   const [notes, setNotes] = useState('')
   const [selectedRinkId, setSelectedRinkId] = useState<number | null>(rinkId)
   const [selectedSlotId, setSelectedSlotId] = useState<number | null>(timeSlotId)
+  const [durationSlots, setDurationSlots] = useState(1)
   const [players, setPlayers] = useState<PlayerInput[]>([])
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<{ rink?: string; slot?: string; type?: string; title?: string }>({})
 
   const [confirmRemoveIndex, setConfirmRemoveIndex] = useState<number | null>(null)
 
@@ -69,10 +71,12 @@ export function BookingModal({
       setNotes(existing?.notes ?? '')
       setSelectedRinkId(rinkId)
       setSelectedSlotId(timeSlotId)
+      setDurationSlots(existing?.durationSlots ?? 1)
       setPlayers(existing?.players.map((p) => ({ userId: p.userId ?? undefined, name: p.name })) ?? [])
       setGuestName('')
       setMemberSearch('')
       setError(null)
+      setFieldErrors({})
       setConfirmRemoveIndex(null)
 
       if (!membersLoaded) {
@@ -101,7 +105,14 @@ export function BookingModal({
   }
 
   async function handleSave() {
-    if (!title.trim() || !type || !selectedRinkId || !selectedSlotId) return
+    const errs = {
+      rink: !selectedRinkId ? 'Please select a rink' : undefined,
+      slot: !selectedSlotId ? 'Please select a time slot' : undefined,
+      type: !type ? 'Please select a booking type' : undefined,
+      title: !title.trim() ? 'Title is required' : undefined,
+    }
+    setFieldErrors(errs)
+    if (errs.rink || errs.slot || errs.type || errs.title) return
     setSaving(true)
     setError(null)
     try {
@@ -109,7 +120,7 @@ export function BookingModal({
       const method = existing ? 'PATCH' : 'POST'
       const body = existing
         ? { title, type, notes, players }
-        : { date, rinkId: selectedRinkId, timeSlotId: selectedSlotId, type, title, notes, players }
+        : { date, rinkId: selectedRinkId, timeSlotId: selectedSlotId, durationSlots, type, title, notes, players }
 
       const res = await fetch(url, {
         method,
@@ -147,8 +158,21 @@ export function BookingModal({
     : availableMembers
 
   const conflictingBooking = !existing && selectedRinkId && selectedSlotId
-    ? bookings.find((b) => b.rinkId === selectedRinkId && b.timeSlotId === selectedSlotId)
-    : null
+    ? (() => {
+        const startIdx = timeSlots.findIndex((s) => s.id === selectedSlotId)
+        if (startIdx === -1) return undefined
+        const newSlotIds = new Set(
+          timeSlots.slice(startIdx, startIdx + durationSlots).map((s) => s.id)
+        )
+        return bookings.find((b) => {
+          if (b.rinkId !== selectedRinkId) return false
+          const bIdx = timeSlots.findIndex((s) => s.id === b.timeSlotId)
+          if (bIdx === -1) return false
+          const bSlotIds = timeSlots.slice(bIdx, bIdx + (b.durationSlots ?? 1)).map((s) => s.id)
+          return bSlotIds.some((id) => newSlotIds.has(id))
+        })
+      })()
+    : undefined
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -162,23 +186,55 @@ export function BookingModal({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-base font-semibold">Rink <span className="text-red-500">*</span></Label>
-              <Select value={selectedRinkId?.toString() ?? ''} onValueChange={(v) => setSelectedRinkId(Number(v))} disabled={!!existing}>
-                <SelectTrigger className="h-11 text-base"><SelectValue placeholder="Select rink" /></SelectTrigger>
+              <Select value={selectedRinkId?.toString() ?? ''} onValueChange={(v) => { setSelectedRinkId(Number(v)); setFieldErrors((p) => ({ ...p, rink: undefined })) }} disabled={!!existing}>
+                <SelectTrigger className={`h-11 text-base ${fieldErrors.rink ? 'border-red-400 ring-red-400' : ''}`}><SelectValue placeholder="Select rink" /></SelectTrigger>
                 <SelectContent>
                   {rinks.map((r) => <SelectItem key={r.id} value={r.id.toString()} className="text-base py-2">{r.label ?? `Rink ${r.number}`}</SelectItem>)}
                 </SelectContent>
               </Select>
+              {fieldErrors.rink && <p className="text-xs text-red-600">{fieldErrors.rink}</p>}
             </div>
             <div className="space-y-2">
               <Label className="text-base font-semibold">Time Slot <span className="text-red-500">*</span></Label>
-              <Select value={selectedSlotId?.toString() ?? ''} onValueChange={(v) => setSelectedSlotId(Number(v))} disabled={!!existing}>
-                <SelectTrigger className="h-11 text-base"><SelectValue placeholder="Select time" /></SelectTrigger>
+              <Select value={selectedSlotId?.toString() ?? ''} onValueChange={(v) => { setSelectedSlotId(Number(v)); setFieldErrors((p) => ({ ...p, slot: undefined })) }} disabled={!!existing}>
+                <SelectTrigger className={`h-11 text-base ${fieldErrors.slot ? 'border-red-400 ring-red-400' : ''}`}><SelectValue placeholder="Select time" /></SelectTrigger>
                 <SelectContent>
                   {timeSlots.map((s) => <SelectItem key={s.id} value={s.id.toString()} className="text-base py-2">{s.startTime}–{s.endTime}</SelectItem>)}
                 </SelectContent>
               </Select>
+              {fieldErrors.slot && <p className="text-xs text-red-600">{fieldErrors.slot}</p>}
             </div>
           </div>
+
+          {/* Duration */}
+          {!existing && (
+            <div className="space-y-2">
+              <Label className="text-base font-semibold">Duration</Label>
+              <Select
+                value={durationSlots.toString()}
+                onValueChange={(v) => setDurationSlots(Number(v))}
+              >
+                <SelectTrigger className="h-11 text-base">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[1, 2, 3].map((d) => {
+                    const startIdx = selectedSlotId
+                      ? timeSlots.findIndex((s) => s.id === selectedSlotId)
+                      : -1
+                    const endSlot = startIdx >= 0 ? timeSlots[startIdx + d - 1] : null
+                    const disabled = startIdx >= 0 && startIdx + d > timeSlots.length
+                    return (
+                      <SelectItem key={d} value={d.toString()} disabled={disabled} className="text-base py-2">
+                        {d === 1 ? '1 Hour' : `${d} Hours`}
+                        {endSlot ? ` (until ${endSlot.endTime})` : ''}
+                      </SelectItem>
+                    )
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Conflict warning */}
           {conflictingBooking && (
@@ -193,18 +249,25 @@ export function BookingModal({
           {/* Type */}
           <div className="space-y-2">
             <Label className="text-base font-semibold">Booking Type <span className="text-red-500">*</span></Label>
-            <Select value={type} onValueChange={(v) => setType(v as BookingType)}>
-              <SelectTrigger className="h-11 text-base"><SelectValue placeholder="Select a type…" /></SelectTrigger>
+            <Select value={type} onValueChange={(v) => { setType(v as BookingType); setFieldErrors((p) => ({ ...p, type: undefined })) }}>
+              <SelectTrigger className={`h-11 text-base ${fieldErrors.type ? 'border-red-400 ring-red-400' : ''}`}><SelectValue placeholder="Select a type…" /></SelectTrigger>
               <SelectContent>
                 {BOOKING_TYPES.map((t) => <SelectItem key={t.value} value={t.value} className="text-base py-2">{t.label}</SelectItem>)}
               </SelectContent>
             </Select>
+            {fieldErrors.type && <p className="text-xs text-red-600">{fieldErrors.type}</p>}
           </div>
 
           {/* Title */}
           <div className="space-y-2">
             <Label className="text-base font-semibold">Title <span className="text-red-500">*</span></Label>
-            <Input className="h-11 text-base" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Club Roll-Up" />
+            <Input
+              className={`h-11 text-base ${fieldErrors.title ? 'border-red-400 focus-visible:ring-red-400' : ''}`}
+              value={title}
+              onChange={(e) => { setTitle(e.target.value); setFieldErrors((p) => ({ ...p, title: undefined })) }}
+              placeholder="e.g. Club Roll-Up"
+            />
+            {fieldErrors.title && <p className="text-xs text-red-600">{fieldErrors.title}</p>}
           </div>
 
           {/* Notes */}
@@ -341,7 +404,7 @@ export function BookingModal({
           )}
           <div className="flex gap-3 sm:ml-auto">
             <Button variant="outline" className="flex-1 sm:flex-none h-12 sm:h-9 text-base sm:text-sm" onClick={onClose}>Cancel</Button>
-            <Button className="flex-1 sm:flex-none h-12 sm:h-9 text-base sm:text-sm" onClick={handleSave} disabled={saving || !title.trim() || !type || !!conflictingBooking}>
+            <Button className="flex-1 sm:flex-none h-12 sm:h-9 text-base sm:text-sm" onClick={handleSave} disabled={saving || !!conflictingBooking}>
               {saving && <Loader2 size={16} className="animate-spin mr-2" />}
               {existing ? 'Save Changes' : 'Create Booking'}
             </Button>

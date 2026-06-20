@@ -55,6 +55,7 @@ export function DateNav({ date }: Props) {
             selected={parsed}
             onSelect={handleSelect}
             autoFocus
+            className="[--cell-size:3rem] sm:[--cell-size:2rem]"
           />
         </PopoverContent>
       </Popover>
