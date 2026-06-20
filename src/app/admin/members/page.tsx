@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { UserPlus, Loader2, Trash2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { UserPlus, Loader2, Trash2, Search, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useEffect, useState, useMemo } from 'react'
 
 interface Member {
   id: string
@@ -17,10 +17,14 @@ interface Member {
   createdAt: number
 }
 
+const PAGE_SIZE = 10
+
 export default function MembersPage() {
   const [members, setMembers] = useState<Member[]>([])
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
   const [modalOpen, setModalOpen] = useState(false)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -39,6 +43,23 @@ export default function MembersPage() {
       })
       .finally(() => setLoading(false))
   }, [])
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return members
+    return members.filter(
+      (m) => m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q)
+    )
+  }, [members, search])
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const currentPage = Math.min(page, totalPages)
+  const pageMembers = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+
+  function handleSearch(q: string) {
+    setSearch(q)
+    setPage(1)
+  }
 
   async function handleRemove(id: string) {
     if (!confirm('Remove this member? This cannot be undone.')) return
@@ -96,6 +117,26 @@ export default function MembersPage() {
         </Button>
       </div>
 
+      <div className="flex items-center justify-between gap-4">
+        <div className="relative w-72">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          <Input
+            placeholder="Search by name or email…"
+            value={search}
+            onChange={(e) => handleSearch(e.target.value)}
+            className="pl-9 h-10 text-base bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+          />
+        </div>
+        {!loading && (
+          <span className="text-sm text-slate-500 dark:text-slate-400 tabular-nums whitespace-nowrap">
+            {filtered.length === members.length
+              ? `${members.length} member${members.length !== 1 ? 's' : ''}`
+              : `${filtered.length} of ${members.length}`}
+            {totalPages > 1 && ` · page ${currentPage} of ${totalPages}`}
+          </span>
+        )}
+      </div>
+
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm overflow-hidden">
         {loading ? (
           <div className="p-8 text-center text-slate-400 dark:text-slate-500">Loading…</div>
@@ -104,16 +145,19 @@ export default function MembersPage() {
             <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
               <tr>
                 <th className="text-left px-4 py-3 font-medium text-slate-500 dark:text-slate-400">Name</th>
-                <th className="text-left px-4 py-3 font-medium text-slate-500 dark:text-slate-400">Email</th>
+                <th className="hidden sm:table-cell text-left px-4 py-3 font-medium text-slate-500 dark:text-slate-400">Email</th>
                 <th className="text-left px-4 py-3 font-medium text-slate-500 dark:text-slate-400">Role</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {members.map((m) => (
-                <tr key={m.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
+            <tbody>
+              {pageMembers.map((m, i) => (
+                <tr
+                  key={m.id}
+                  className={i % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50 dark:bg-slate-800/50'}
+                >
                   <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200">{m.name}</td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{m.email}</td>
+                  <td className="hidden sm:table-cell px-4 py-3 text-slate-600 dark:text-slate-400">{m.email}</td>
                   <td className="px-4 py-3">
                     <Badge variant={m.role === 'admin' ? 'default' : 'secondary'}>{m.role}</Badge>
                   </td>
@@ -134,10 +178,10 @@ export default function MembersPage() {
                   </td>
                 </tr>
               ))}
-              {members.length === 0 && (
+              {filtered.length === 0 && (
                 <tr>
                   <td colSpan={4} className="px-4 py-8 text-center text-slate-400 dark:text-slate-500">
-                    No members yet
+                    {search ? 'No members match your search' : 'No members yet'}
                   </td>
                 </tr>
               )}
@@ -145,6 +189,34 @@ export default function MembersPage() {
           </table>
         )}
       </div>
+
+      {/* Pagination */}
+      {!loading && filtered.length > PAGE_SIZE && (
+        <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
+          <span>
+            {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filtered.length)} of {filtered.length}
+          </span>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => p - 1)}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft size={15} />
+            </Button>
+            <span className="px-2 tabular-nums">{currentPage} / {totalPages}</span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => p + 1)}
+              disabled={currentPage === totalPages}
+            >
+              <ChevronRight size={15} />
+            </Button>
+          </div>
+        </div>
+      )}
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="sm:max-w-sm">

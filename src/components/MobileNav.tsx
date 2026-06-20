@@ -49,11 +49,11 @@ export function MobileNav({ isAdmin, isLoggedIn, userName }: Props) {
                   Members
                 </Link>
                 <Link
-                  href="/admin/rinks"
+                  href="/admin/config"
                   onClick={() => setOpen(false)}
                   className="px-5 py-4 text-lg font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100"
                 >
-                  Rinks
+                  Configuration
                 </Link>
               </>
             )}

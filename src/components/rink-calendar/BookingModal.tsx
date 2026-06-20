@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
 import { BOOKING_TYPES } from '@/lib/booking-types'
 import type { BookingType, BookingWithPlayers, Rink, TimeSlot } from '@/lib/db/schema'
 import { Loader2, Trash2, X, UserPlus, User, AlertCircle } from 'lucide-react'
@@ -54,6 +53,8 @@ export function BookingModal({
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const [confirmRemoveIndex, setConfirmRemoveIndex] = useState<number | null>(null)
+
   // Player add state
   const [addMode, setAddMode] = useState<'member' | 'guest'>('member')
   const [guestName, setGuestName] = useState('')
@@ -72,6 +73,7 @@ export function BookingModal({
       setGuestName('')
       setMemberSearch('')
       setError(null)
+      setConfirmRemoveIndex(null)
 
       if (!membersLoaded) {
         fetch('/api/members')
@@ -211,27 +213,48 @@ export function BookingModal({
             <Textarea className="text-base" value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} placeholder="Any additional details…" />
           </div>
 
+          {error && <p className="text-base text-red-600 font-medium">{error}</p>}
+
           <Separator />
 
           {/* Players */}
           <div className="space-y-3">
             <Label className="text-base font-semibold">Players</Label>
 
+            {/* Added players */}
             {players.length > 0 && (
-              <ul className="space-y-1.5 max-h-44 overflow-y-auto">
+              <ul className="space-y-1.5">
                 {players.map((p, i) => (
-                  <li key={i} className="flex items-center justify-between gap-2 py-2 px-3 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <User size={15} className="text-slate-400 dark:text-slate-500 shrink-0" />
-                      <span className="truncate text-base font-medium">{p.name}</span>
-                      {p.userId
-                        ? <Badge variant="secondary" className="text-xs shrink-0">Member</Badge>
-                        : <Badge variant="outline" className="text-xs shrink-0">Guest</Badge>
-                      }
-                    </div>
-                    <button onClick={() => removePlayer(i)} className="text-slate-400 dark:text-slate-500 hover:text-red-500 shrink-0 p-1">
-                      <X size={16} />
-                    </button>
+                  <li key={i} className="flex items-center justify-between gap-2 py-2 px-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    {confirmRemoveIndex === i ? (
+                      <>
+                        <span className="text-sm text-slate-600 dark:text-slate-300">Remove <span className="font-semibold">{p.name}</span> from this booking?</span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            onClick={() => { removePlayer(i); setConfirmRemoveIndex(null) }}
+                            className="text-xs font-semibold text-red-600 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                          >
+                            Remove
+                          </button>
+                          <button
+                            onClick={() => setConfirmRemoveIndex(null)}
+                            className="text-xs font-semibold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 px-2 py-1 rounded hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <User size={15} className="text-slate-400 dark:text-slate-500 shrink-0" />
+                          <span className="truncate text-base font-medium">{p.name}</span>
+                        </div>
+                        <button onClick={() => setConfirmRemoveIndex(i)} className="text-slate-400 dark:text-slate-500 hover:text-red-500 shrink-0 p-1">
+                          <X size={16} />
+                        </button>
+                      </>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -266,7 +289,7 @@ export function BookingModal({
                         onChange={(e) => setMemberSearch(e.target.value)}
                         className="w-full h-11 text-base px-3 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 outline-none focus:border-slate-400 dark:focus:border-slate-500"
                       />
-                      <ul className="max-h-44 overflow-y-auto rounded-md border border-slate-200 dark:border-slate-700">
+                      <ul className="max-h-80 overflow-y-auto rounded-md border border-slate-200 dark:border-slate-700">
                         {filteredMembers.length === 0 ? (
                           <li className="px-3 py-4 text-sm text-slate-400 dark:text-slate-500 text-center">No members found</li>
                         ) : filteredMembers.map((m, i) => (
@@ -307,8 +330,6 @@ export function BookingModal({
               )}
             </div>
           </div>
-
-          {error && <p className="text-base text-red-600 font-medium">{error}</p>}
         </div>
 
         <DialogFooter className="flex-col-reverse sm:flex-row sm:justify-between gap-3 shrink-0">
