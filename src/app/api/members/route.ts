@@ -20,7 +20,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
   const data = await getAllUsers()
-  return NextResponse.json({ members: data })
+  return NextResponse.json({ members: data, currentUserId: session?.user?.id ?? null })
 }
 
 export async function POST(req: NextRequest) {

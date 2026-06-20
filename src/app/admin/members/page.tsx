@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { UserPlus, Loader2 } from 'lucide-react'
+import { UserPlus, Loader2, Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 interface Member {
@@ -19,6 +19,7 @@ interface Member {
 
 export default function MembersPage() {
   const [members, setMembers] = useState<Member[]>([])
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [name, setName] = useState('')
@@ -27,13 +28,30 @@ export default function MembersPage() {
   const [role, setRole] = useState<'admin' | 'member'>('member')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [removingId, setRemovingId] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/members')
       .then((r) => r.json())
-      .then((d) => setMembers(d.members ?? []))
+      .then((d) => {
+        setMembers(d.members ?? [])
+        setCurrentUserId(d.currentUserId ?? null)
+      })
       .finally(() => setLoading(false))
   }, [])
+
+  async function handleRemove(id: string) {
+    if (!confirm('Remove this member? This cannot be undone.')) return
+    setRemovingId(id)
+    try {
+      const res = await fetch(`/api/members/${id}`, { method: 'DELETE' })
+      if (res.ok) {
+        setMembers((prev) => prev.filter((m) => m.id !== id))
+      }
+    } finally {
+      setRemovingId(null)
+    }
+  }
 
   function openModal() {
     setName('')
@@ -88,6 +106,7 @@ export default function MembersPage() {
                 <th className="text-left px-4 py-3 font-medium text-slate-500">Name</th>
                 <th className="text-left px-4 py-3 font-medium text-slate-500">Email</th>
                 <th className="text-left px-4 py-3 font-medium text-slate-500">Role</th>
+                <th className="px-4 py-3" />
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -98,11 +117,26 @@ export default function MembersPage() {
                   <td className="px-4 py-3">
                     <Badge variant={m.role === 'admin' ? 'default' : 'secondary'}>{m.role}</Badge>
                   </td>
+                  <td className="px-4 py-3 text-right">
+                    {m.id !== currentUserId && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemove(m.id)}
+                        disabled={removingId === m.id}
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                      >
+                        {removingId === m.id
+                          ? <Loader2 size={14} className="animate-spin" />
+                          : <Trash2 size={14} />}
+                      </Button>
+                    )}
+                  </td>
                 </tr>
               ))}
               {members.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="px-4 py-8 text-center text-slate-400">
+                  <td colSpan={4} className="px-4 py-8 text-center text-slate-400">
                     No members yet
                   </td>
                 </tr>
