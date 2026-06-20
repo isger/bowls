@@ -57,7 +57,7 @@ export function BookingModal({
   // Player add state
   const [addMode, setAddMode] = useState<'member' | 'guest'>('member')
   const [guestName, setGuestName] = useState('')
-  const [selectedMemberId, setSelectedMemberId] = useState<string>('')
+  const [memberSearch, setMemberSearch] = useState('')
   const [members, setMembers] = useState<Member[]>([])
   const [membersLoaded, setMembersLoaded] = useState(false)
 
@@ -70,7 +70,7 @@ export function BookingModal({
       setSelectedSlotId(timeSlotId)
       setPlayers(existing?.players.map((p) => ({ userId: p.userId ?? undefined, name: p.name })) ?? [])
       setGuestName('')
-      setSelectedMemberId('')
+      setMemberSearch('')
       setError(null)
 
       if (!membersLoaded) {
@@ -81,12 +81,10 @@ export function BookingModal({
     }
   }, [open, existing, rinkId, timeSlotId])
 
-  function addMember() {
-    const member = members.find((m) => m.id === selectedMemberId)
-    if (!member) return
-    if (players.some((p) => p.userId === member.id)) return
+  function addMemberById(id: string) {
+    const member = members.find((m) => m.id === id)
+    if (!member || players.some((p) => p.userId === member.id)) return
     setPlayers((prev) => [...prev, { userId: member.id, name: member.name }])
-    setSelectedMemberId('')
   }
 
   function addGuest() {
@@ -139,6 +137,12 @@ export function BookingModal({
   }
 
   const availableMembers = members.filter((m) => !players.some((p) => p.userId === m.id))
+  const filteredMembers = memberSearch.trim()
+    ? availableMembers.filter((m) =>
+        m.name.toLowerCase().includes(memberSearch.toLowerCase()) ||
+        m.email.toLowerCase().includes(memberSearch.toLowerCase())
+      )
+    : availableMembers
 
   const conflictingBooking = !existing && selectedRinkId && selectedSlotId
     ? bookings.find((b) => b.rinkId === selectedRinkId && b.timeSlotId === selectedSlotId)
@@ -251,23 +255,37 @@ export function BookingModal({
               </div>
 
               {addMode === 'member' ? (
-                <div className="flex gap-2">
-                  <Select value={selectedMemberId} onValueChange={setSelectedMemberId}>
-                    <SelectTrigger className="flex-1 h-11 text-base">
-                      <SelectValue placeholder={availableMembers.length ? 'Choose a member…' : 'All members added'} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {availableMembers.map((m) => (
-                        <SelectItem key={m.id} value={m.id} className="text-base py-2">
-                          {m.name}
-                          <span className="text-slate-400 ml-2 text-sm">{m.email}</span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button variant="outline" className="h-11 px-4" onClick={addMember} disabled={!selectedMemberId}>
-                    <UserPlus size={16} className="mr-1" /> Add
-                  </Button>
+                <div className="space-y-2">
+                  {availableMembers.length === 0 ? (
+                    <p className="text-sm text-slate-400 dark:text-slate-500 text-center py-2">All members added</p>
+                  ) : (
+                    <>
+                      <input
+                        placeholder="Search members…"
+                        value={memberSearch}
+                        onChange={(e) => setMemberSearch(e.target.value)}
+                        className="w-full h-11 text-base px-3 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 outline-none focus:border-slate-400 dark:focus:border-slate-500"
+                      />
+                      <ul className="max-h-44 overflow-y-auto rounded-md border border-slate-200 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-800">
+                        {filteredMembers.length === 0 ? (
+                          <li className="px-3 py-4 text-sm text-slate-400 dark:text-slate-500 text-center">No members found</li>
+                        ) : filteredMembers.map((m) => (
+                          <li key={m.id}>
+                            <button
+                              onClick={() => addMemberById(m.id)}
+                              className="w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100 transition-colors"
+                            >
+                              <UserPlus size={15} className="text-slate-400 dark:text-slate-500 shrink-0" />
+                              <div className="min-w-0">
+                                <div className="text-base font-medium text-slate-800 dark:text-slate-200 truncate">{m.name}</div>
+                                <div className="text-sm text-slate-500 dark:text-slate-400 truncate">{m.email}</div>
+                              </div>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
                 </div>
               ) : (
                 <div className="flex gap-2">
