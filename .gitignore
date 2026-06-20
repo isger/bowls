@@ -41,3 +41,7 @@ yarn-error.log*
 next-env.d.ts
 bowls.db
 drizzle/
+
+# Dev server
+.bowls-dev.log
+.bowls-dev.pid
