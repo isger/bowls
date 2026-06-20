@@ -31,13 +31,11 @@ export function DateNav({ date }: Props) {
     <div className="flex items-center gap-2 w-full sm:w-auto">
       <Button
         variant="outline"
-        className="h-12 sm:h-9 text-base sm:text-sm px-4 sm:px-3"
+        className="h-12 sm:h-9 px-3"
         onClick={() => router.push(`/calendar/${prev}`)}
       >
-        <ChevronLeft size={20} className="sm:hidden" />
-        <ChevronLeft size={16} className="hidden sm:inline" />
-        <span className="ml-1 sm:hidden">Prev</span>
-        <span className="ml-1 hidden sm:inline">Previous</span>
+        <ChevronLeft size={20} />
+        <span className="hidden sm:inline ml-1">Previous</span>
       </Button>
 
       <Popover open={open} onOpenChange={setOpen}>
@@ -63,13 +61,11 @@ export function DateNav({ date }: Props) {
 
       <Button
         variant="outline"
-        className="h-12 sm:h-9 text-base sm:text-sm px-4 sm:px-3"
+        className="h-12 sm:h-9 px-3"
         onClick={() => router.push(`/calendar/${next}`)}
       >
-        <span className="mr-1 sm:hidden">Next</span>
-        <span className="mr-1 hidden sm:inline">Next</span>
-        <ChevronRight size={20} className="sm:hidden" />
-        <ChevronRight size={16} className="hidden sm:inline" />
+        <span className="hidden sm:inline mr-1">Next</span>
+        <ChevronRight size={20} />
       </Button>
     </div>
   )
