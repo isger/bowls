@@ -42,6 +42,7 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set())
   const [filterOpen, setFilterOpen] = useState(false)
   const [search, setSearch] = useState('')
+  const [selectedRinkId, setSelectedRinkId] = useState<number | null>(null)
 
   const allPlayers = useMemo(() => {
     const map = new Map<string, { key: string; name: string; isMember: boolean }>()
@@ -229,9 +230,36 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
         </div>
       )}
 
+      {/* Rink filter — mobile only */}
+      <div className="sm:hidden flex gap-2 overflow-x-auto pb-1 print:hidden">
+        <button
+          onClick={() => setSelectedRinkId(null)}
+          className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            selectedRinkId === null
+              ? 'bg-slate-800 text-white'
+              : 'bg-slate-100 text-slate-600 active:bg-slate-200'
+          }`}
+        >
+          All rinks
+        </button>
+        {rinks.map((rink) => (
+          <button
+            key={rink.id}
+            onClick={() => setSelectedRinkId(rink.id)}
+            className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              selectedRinkId === rink.id
+                ? 'bg-slate-800 text-white'
+                : 'bg-slate-100 text-slate-600 active:bg-slate-200'
+            }`}
+          >
+            {rink.label ?? `Rink ${rink.number}`}
+          </button>
+        ))}
+      </div>
+
       <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
         <CalendarGrid
-          rinks={rinks}
+          rinks={selectedRinkId ? rinks.filter((r) => r.id === selectedRinkId) : rinks}
           timeSlots={timeSlots}
           bookings={filteredBookings}
           canCreate={canCreate}

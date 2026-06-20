@@ -21,9 +21,10 @@ export function CalendarGrid({ rinks, timeSlots, bookings, canCreate, canEditBoo
   return (
     <div className="overflow-x-auto">
       <div
-        className="grid min-w-[500px] print:min-w-0"
+        className="grid print:min-w-0"
         style={{
           gridTemplateColumns: `70px repeat(${rinks.length}, minmax(110px, 1fr))`,
+          minWidth: rinks.length > 1 ? '500px' : 'auto',
         }}
       >
         {/* Header row */}
