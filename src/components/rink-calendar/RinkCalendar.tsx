@@ -131,9 +131,9 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
                 variant={activeFilters.size > 0 ? 'default' : 'outline'}
                 className="h-12 sm:h-9 text-base sm:text-sm flex-1 sm:flex-none gap-2"
               >
-                <SlidersHorizontal size={18} className="sm:hidden" />
-                <SlidersHorizontal size={16} className="hidden sm:inline" />
-                Filter by Player
+                <SlidersHorizontal size={18} />
+                <span className="sm:hidden">Filter</span>
+                <span className="hidden sm:inline">Filter by Player</span>
                 {activeFilters.size > 0 && (
                   <span className="ml-0.5 rounded-full bg-white/20 px-1.5 text-xs font-semibold">
                     {activeFilters.size}
@@ -189,15 +189,14 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
           </Popover>
 
           {canCreate && (
-            <Button className="h-12 sm:h-9 text-base sm:text-sm flex-1 sm:flex-none" onClick={() => openModal()}>
-              <Plus size={20} className="mr-1.5 sm:hidden" />
-              <Plus size={16} className="mr-1.5 hidden sm:inline" />
-              New Booking
+            <Button className="h-12 sm:h-9 text-base sm:text-sm flex-1 sm:flex-none gap-2" onClick={() => openModal()}>
+              <Plus size={18} />
+              <span className="sm:hidden">Book</span>
+              <span className="hidden sm:inline">New Booking</span>
             </Button>
           )}
           <Button variant="outline" onClick={() => window.print()} className="h-12 sm:h-9 text-base sm:text-sm flex-1 sm:flex-none gap-2">
-            <Printer size={18} className="sm:hidden" />
-            <Printer size={16} className="hidden sm:inline" />
+            <Printer size={18} />
             Print
           </Button>
         </div>
