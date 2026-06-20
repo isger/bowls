@@ -21,7 +21,7 @@ export function BookingCell({ booking, canEdit, showPlayers, onClick }: Props) {
     <button
       onClick={canEdit ? onClick : undefined}
       className={cn(
-        'group relative w-full h-full min-h-[90px] rounded p-3 text-left transition-opacity',
+        'group relative w-full h-full min-h-[90px] print:min-h-0 rounded p-3 text-left transition-opacity',
         config.bg,
         config.text,
         canEdit ? 'cursor-pointer hover:opacity-90' : 'cursor-default'
@@ -43,9 +43,13 @@ export function BookingCell({ booking, canEdit, showPlayers, onClick }: Props) {
         </span>
       )}
       {playerCount > 0 && (
-        <span className="hidden print:block text-xs mt-2 opacity-90 leading-snug font-medium">
-          {booking.players.map((p) => p.name).join(', ')}
-        </span>
+        <ol className="hidden print:block mt-2 pl-3.5 space-y-0.5">
+          {booking.players.map((p) => (
+            <li key={p.id} className="text-[10px] font-medium opacity-90 leading-tight list-decimal">
+              {p.name}
+            </li>
+          ))}
+        </ol>
       )}
       {canEdit && (
         <span className="print:hidden absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">

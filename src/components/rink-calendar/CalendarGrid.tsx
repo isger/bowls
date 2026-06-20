@@ -54,7 +54,7 @@ export function CalendarGrid({ rinks, timeSlots, bookings, canCreate, canEditBoo
               return (
                 <div
                   key={`cell-${rink.id}-${slot.id}`}
-                  className="border border-slate-200 dark:border-slate-700 p-1.5 min-h-[90px]"
+                  className="border border-slate-200 dark:border-slate-700 p-1.5 min-h-[90px] print:min-h-0"
                 >
                   {booking ? (
                     <BookingCell
