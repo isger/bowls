@@ -29,14 +29,23 @@ export function DateNav({ date }: Props) {
 
   return (
     <div className="flex items-center gap-2 w-full sm:w-auto">
-      <Button variant="outline" onClick={() => router.push(`/calendar/${prev}`)}>
-        <ChevronLeft size={18} />
+      <Button
+        variant="outline"
+        className="h-12 sm:h-9 text-base sm:text-sm px-4 sm:px-3"
+        onClick={() => router.push(`/calendar/${prev}`)}
+      >
+        <ChevronLeft size={20} className="sm:hidden" />
+        <ChevronLeft size={16} className="hidden sm:inline" />
+        <span className="ml-1 sm:hidden">Prev</span>
         <span className="ml-1 hidden sm:inline">Previous</span>
       </Button>
 
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="flex-1 sm:flex-none sm:min-w-[220px] font-semibold text-slate-700 text-base">
+          <Button
+            variant="outline"
+            className="flex-1 sm:flex-none sm:min-w-[220px] h-12 sm:h-9 text-base sm:text-sm font-semibold dark:text-slate-200"
+          >
             <CalendarIcon size={18} className="mr-2 text-slate-400 shrink-0" />
             <span className="hidden sm:inline">{displayDate}</span>
             <span className="sm:hidden">{displayDateShort}</span>
@@ -52,9 +61,15 @@ export function DateNav({ date }: Props) {
         </PopoverContent>
       </Popover>
 
-      <Button variant="outline" onClick={() => router.push(`/calendar/${next}`)}>
+      <Button
+        variant="outline"
+        className="h-12 sm:h-9 text-base sm:text-sm px-4 sm:px-3"
+        onClick={() => router.push(`/calendar/${next}`)}
+      >
+        <span className="mr-1 sm:hidden">Next</span>
         <span className="mr-1 hidden sm:inline">Next</span>
-        <ChevronRight size={18} />
+        <ChevronRight size={20} className="sm:hidden" />
+        <ChevronRight size={16} className="hidden sm:inline" />
       </Button>
     </div>
   )

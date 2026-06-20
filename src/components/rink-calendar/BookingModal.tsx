@@ -291,14 +291,14 @@ export function BookingModal({
 
         <DialogFooter className="flex-col-reverse sm:flex-row sm:justify-between gap-3">
           {existing && canDelete && (
-            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+            <Button variant="destructive" className="h-12 sm:h-9 text-base sm:text-sm" onClick={handleDelete} disabled={deleting}>
               {deleting ? <Loader2 size={16} className="animate-spin mr-2" /> : <Trash2 size={16} className="mr-2" />}
               Delete Booking
             </Button>
           )}
-          <div className="flex gap-3 ml-auto">
-            <Button variant="outline" onClick={onClose}>Cancel</Button>
-            <Button onClick={handleSave} disabled={saving || !title.trim() || !type || !!conflictingBooking}>
+          <div className="flex gap-3 sm:ml-auto">
+            <Button variant="outline" className="flex-1 sm:flex-none h-12 sm:h-9 text-base sm:text-sm" onClick={onClose}>Cancel</Button>
+            <Button className="flex-1 sm:flex-none h-12 sm:h-9 text-base sm:text-sm" onClick={handleSave} disabled={saving || !title.trim() || !type || !!conflictingBooking}>
               {saving && <Loader2 size={16} className="animate-spin mr-2" />}
               {existing ? 'Save Changes' : 'Create Booking'}
             </Button>

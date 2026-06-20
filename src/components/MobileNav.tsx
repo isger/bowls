@@ -19,7 +19,7 @@ export function MobileNav({ isAdmin, isLoggedIn, userName }: Props) {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label={open ? 'Close menu' : 'Open menu'}
-        className="p-2 rounded-md text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+        className="p-3 rounded-md text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
       >
         {open ? <X size={24} /> : <Menu size={24} />}
       </button>
@@ -35,7 +35,7 @@ export function MobileNav({ isAdmin, isLoggedIn, userName }: Props) {
             <Link
               href="/"
               onClick={() => setOpen(false)}
-              className="px-5 py-3 text-base font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100"
+              className="px-5 py-4 text-lg font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100"
             >
               Diary
             </Link>
@@ -44,14 +44,14 @@ export function MobileNav({ isAdmin, isLoggedIn, userName }: Props) {
                 <Link
                   href="/admin/members"
                   onClick={() => setOpen(false)}
-                  className="px-5 py-3 text-base font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100"
+                  className="px-5 py-4 text-lg font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100"
                 >
                   Members
                 </Link>
                 <Link
                   href="/admin/rinks"
                   onClick={() => setOpen(false)}
-                  className="px-5 py-3 text-base font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100"
+                  className="px-5 py-4 text-lg font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100"
                 >
                   Rinks
                 </Link>
@@ -62,7 +62,7 @@ export function MobileNav({ isAdmin, isLoggedIn, userName }: Props) {
                 <Link
                   href="/api/auth/signout"
                   onClick={() => setOpen(false)}
-                  className="px-5 py-3 text-base font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100 block"
+                  className="px-5 py-4 text-lg font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100 block"
                 >
                   Sign out
                 </Link>
@@ -70,7 +70,7 @@ export function MobileNav({ isAdmin, isLoggedIn, userName }: Props) {
                 <Link
                   href="/login"
                   onClick={() => setOpen(false)}
-                  className="px-5 py-3 text-base font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100 block"
+                  className="px-5 py-4 text-lg font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 active:bg-slate-100 block"
                 >
                   Sign in
                 </Link>

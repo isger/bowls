@@ -123,15 +123,16 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
       {/* Header row — hidden in print */}
       <div className="print:hidden flex flex-col sm:flex-row sm:items-center gap-3">
         <DateNav date={date} />
-        <div className="flex items-center gap-2 sm:ml-auto">
+        <div className="flex items-center gap-2 sm:ml-auto w-full sm:w-auto">
           {/* Player filter */}
           <Popover open={filterOpen} onOpenChange={setFilterOpen}>
             <PopoverTrigger asChild>
               <Button
                 variant={activeFilters.size > 0 ? 'default' : 'outline'}
-                className="gap-2"
+                className="h-12 sm:h-9 text-base sm:text-sm flex-1 sm:flex-none gap-2"
               >
-                <SlidersHorizontal size={16} />
+                <SlidersHorizontal size={18} className="sm:hidden" />
+                <SlidersHorizontal size={16} className="hidden sm:inline" />
                 Filter by Player
                 {activeFilters.size > 0 && (
                   <span className="ml-0.5 rounded-full bg-white/20 px-1.5 text-xs font-semibold">
@@ -188,13 +189,15 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
           </Popover>
 
           {canCreate && (
-            <Button onClick={() => openModal()}>
-              <Plus size={18} className="mr-2" />
+            <Button className="h-12 sm:h-9 text-base sm:text-sm flex-1 sm:flex-none" onClick={() => openModal()}>
+              <Plus size={20} className="mr-1.5 sm:hidden" />
+              <Plus size={16} className="mr-1.5 hidden sm:inline" />
               New Booking
             </Button>
           )}
-          <Button variant="outline" onClick={() => window.print()} className="gap-2">
-            <Printer size={16} />
+          <Button variant="outline" onClick={() => window.print()} className="h-12 sm:h-9 text-base sm:text-sm flex-1 sm:flex-none gap-2">
+            <Printer size={18} className="sm:hidden" />
+            <Printer size={16} className="hidden sm:inline" />
             Print
           </Button>
         </div>
@@ -231,10 +234,10 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
       )}
 
       {/* Rink filter — mobile only */}
-      <div className="sm:hidden flex gap-2 overflow-x-auto pb-1 print:hidden">
+      <div className="sm:hidden flex gap-2.5 overflow-x-auto pb-1 print:hidden">
         <button
           onClick={() => setSelectedRinkId(null)}
-          className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+          className={`shrink-0 px-5 py-3 rounded-full text-base font-semibold transition-colors ${
             selectedRinkId === null
               ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900'
               : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 active:bg-slate-200 dark:active:bg-slate-700'
@@ -246,7 +249,7 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
           <button
             key={rink.id}
             onClick={() => setSelectedRinkId(rink.id)}
-            className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            className={`shrink-0 px-5 py-3 rounded-full text-base font-semibold transition-colors ${
               selectedRinkId === rink.id
                 ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 active:bg-slate-200 dark:active:bg-slate-700'
