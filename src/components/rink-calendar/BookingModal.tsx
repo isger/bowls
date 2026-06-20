@@ -150,12 +150,12 @@ export function BookingModal({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-lg flex flex-col max-h-[90vh]">
+        <DialogHeader className="shrink-0">
           <DialogTitle className="text-xl">{existing ? 'Edit Booking' : 'New Booking'}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-5 py-2">
+        <div className="space-y-5 py-2 overflow-y-auto flex-1 min-h-0 pr-1">
           {/* Rink + Time Slot */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -307,7 +307,7 @@ export function BookingModal({
           {error && <p className="text-base text-red-600 font-medium">{error}</p>}
         </div>
 
-        <DialogFooter className="flex-col-reverse sm:flex-row sm:justify-between gap-3">
+        <DialogFooter className="flex-col-reverse sm:flex-row sm:justify-between gap-3 shrink-0">
           {existing && canDelete && (
             <Button variant="destructive" className="h-12 sm:h-9 text-base sm:text-sm" onClick={handleDelete} disabled={deleting}>
               {deleting ? <Loader2 size={16} className="animate-spin mr-2" /> : <Trash2 size={16} className="mr-2" />}
