@@ -115,7 +115,7 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
       {/* Print-only header */}
       <div className="hidden print:block mb-2">
         <h1 className="text-2xl font-bold text-slate-800">Ferndown Bowls Club</h1>
-        <p className="text-lg text-slate-600 mt-0.5">Rink Bookings — {formattedDate}</p>
+        <p className="text-lg text-slate-600 mt-0.5">Rink Bookings: {formattedDate}</p>
         <div className="flex flex-wrap items-center gap-4 mt-2 pt-2 border-t border-slate-200">
           {Object.entries(BOOKING_TYPE_CONFIG).map(([type, config]) => (
             <div key={type} className="flex items-center gap-1.5">
@@ -126,7 +126,7 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
         </div>
       </div>
 
-      {/* Header row — hidden in print */}
+      {/* Header row hidden in print */}
       <div className="print:hidden flex flex-col sm:flex-row sm:items-center gap-3">
         <DateNav date={date} />
         <div className="flex items-center gap-2 sm:ml-auto w-full sm:w-auto">
@@ -215,7 +215,7 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
         </div>
       </div>
 
-      {/* Legend row — hidden on mobile and in print */}
+      {/* Legend row hidden on mobile and in print */}
       <div className="hidden md:flex print:hidden items-center gap-x-6 gap-y-1.5 flex-wrap -mt-1">
         {Object.entries(BOOKING_TYPE_CONFIG).map(([type, config]) => (
           <div key={type} className="flex items-center gap-2">
@@ -225,7 +225,7 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
         ))}
       </div>
 
-      {/* Active filter chips — hidden in print */}
+      {/* Active filter chips hidden in print */}
       {activeFilterPlayers.length > 0 && (
         <div className="print:hidden flex flex-wrap items-center gap-2">
           <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Showing:</span>
@@ -245,7 +245,7 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
         </div>
       )}
 
-      {/* Rink filter — mobile only */}
+      {/* Rink filter mobile only */}
       <div className="sm:hidden flex gap-2.5 overflow-x-auto pb-1 print:hidden">
         <button
           onClick={() => setSelectedRinkId(null)}

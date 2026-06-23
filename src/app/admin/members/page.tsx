@@ -246,7 +246,7 @@ export default function MembersPage() {
         )}
       </div>
 
-      {/* Print-only table — all filtered members, no role column */}
+      {/* Print-only table all filtered members, no role column */}
       {!loading && (
         <div className="hidden print:block">
           <p className="text-sm text-slate-500 mb-6">

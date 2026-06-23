@@ -64,7 +64,7 @@ export function BookingCell({ booking, canEdit, showPlayers, onClick }: Props) {
       >
         {header}
 
-        {/* Inline list — screen only */}
+        {/* Inline list screen only */}
         <div className="print:hidden mt-2 rounded overflow-hidden border border-white/30">
           {inlinePlayers.map((p, i) => (
             <div key={p.id} className={`flex items-center gap-1.5 px-1.5 py-0.5 ${i % 2 === 0 ? 'bg-white/90' : 'bg-white/60'}`}>

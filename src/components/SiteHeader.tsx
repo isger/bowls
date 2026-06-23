@@ -58,7 +58,7 @@ export async function SiteHeader() {
               </Link>
             )}
 
-            {/* Hamburger — mobile only */}
+            {/* Hamburger mobile only */}
             <MobileNav
               isAdmin={isAdmin}
               isLoggedIn={!!session?.user}

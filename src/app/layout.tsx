@@ -5,6 +5,7 @@ import { SiteHeader } from '@/components/SiteHeader'
 import { DemoBanner } from '@/components/DemoBanner'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { MapPin, ExternalLink } from 'lucide-react'
+import NextTopLoader from 'nextjs-toploader'
 
 const geist = Geist({ subsets: ['latin'] })
 
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={geist.className} suppressHydrationWarning>
       <body className="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased min-h-screen flex flex-col">
         <ThemeProvider>
+          <NextTopLoader color="#0d9488" showSpinner={false} height={3} />
           <DemoBanner />
           <SiteHeader />
           <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">

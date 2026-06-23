@@ -347,7 +347,7 @@ export function BulkBookingModal({ open, onClose, onSave, date, rinks, timeSlots
                   </Select>
                 </div>
                 <p className="text-xs text-slate-400 dark:text-slate-500">
-                  {friendlyDate(dates[0])} → {friendlyDate(dates[dates.length - 1])} &mdash; {dateCount} dates total
+                  {friendlyDate(dates[0])} to {friendlyDate(dates[dates.length - 1])}, {dateCount} dates total
                 </p>
               </div>
             )}
@@ -401,20 +401,20 @@ export function BulkBookingModal({ open, onClose, onSave, date, rinks, timeSlots
               {result.created === 0 && result.conflicts.length > 0 && (
                 <div className="flex items-start gap-3 rounded-lg border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/40 px-4 py-3 text-sm text-red-800 dark:text-red-300">
                   <AlertCircle size={16} className="shrink-0 mt-0.5 text-red-500" />
-                  <span className="font-semibold">Nothing booked — all selected slots are already taken.</span>
+                  <span className="font-semibold">Nothing booked. All selected slots are already taken.</span>
                 </div>
               )}
               {conflictDates.length > 0 && (
                 <div className="rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 px-4 py-3 space-y-1.5">
                   <div className="flex items-center gap-2 text-sm font-semibold text-amber-800 dark:text-amber-300">
                     <AlertCircle size={15} className="text-amber-500" />
-                    {result.conflicts.length} slot{result.conflicts.length !== 1 ? 's' : ''} skipped — already booked:
+                    {result.conflicts.length} slot{result.conflicts.length !== 1 ? 's' : ''} skipped, already booked:
                   </div>
                   <ul className="space-y-0.5 pl-5">
                     {conflictDates.map(([d, rinkNames]) => (
                       <li key={d} className="text-sm text-amber-700 dark:text-amber-400">
                         <span className="font-medium">{friendlyDate(d)}</span>
-                        {' — '}
+                        {': '}
                         {rinkNames.join(', ')}
                       </li>
                     ))}

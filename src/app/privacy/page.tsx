@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Privacy Notice — Ferndown Bowls Club',
+  title: 'Privacy Notice | Ferndown Bowls Club',
 }
 
 export default function PrivacyPage() {
@@ -47,7 +47,7 @@ export default function PrivacyPage() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200">Why we hold it and our lawful basis</h2>
           <p className="text-slate-600 dark:text-slate-400">
-            We process your personal data on the basis of <strong className="text-slate-700 dark:text-slate-300">legitimate interests</strong> — specifically,
+            We process your personal data on the basis of <strong className="text-slate-700 dark:text-slate-300">legitimate interests</strong>: specifically,
             the administration of club membership and rink booking. This means we need your name and email
             to manage your account, allow you to sign in, and record bookings against your membership.
           </p>
@@ -83,11 +83,11 @@ export default function PrivacyPage() {
           <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200">Your rights</h2>
           <p className="text-slate-600 dark:text-slate-400">Under UK GDPR you have the right to:</p>
           <ul className="list-disc list-inside space-y-1 text-slate-600 dark:text-slate-400 pl-2">
-            <li><strong className="text-slate-700 dark:text-slate-300">Access</strong> — request a copy of the personal data we hold about you</li>
-            <li><strong className="text-slate-700 dark:text-slate-300">Correction</strong> — ask us to correct inaccurate information</li>
-            <li><strong className="text-slate-700 dark:text-slate-300">Erasure</strong> — ask us to delete your data (subject to any legal obligations)</li>
-            <li><strong className="text-slate-700 dark:text-slate-300">Restriction</strong> — ask us to limit how we use your data</li>
-            <li><strong className="text-slate-700 dark:text-slate-300">Objection</strong> — object to our processing based on legitimate interests</li>
+            <li><strong className="text-slate-700 dark:text-slate-300">Access:</strong> request a copy of the personal data we hold about you</li>
+            <li><strong className="text-slate-700 dark:text-slate-300">Correction:</strong> ask us to correct inaccurate information</li>
+            <li><strong className="text-slate-700 dark:text-slate-300">Erasure:</strong> ask us to delete your data (subject to any legal obligations)</li>
+            <li><strong className="text-slate-700 dark:text-slate-300">Restriction:</strong> ask us to limit how we use your data</li>
+            <li><strong className="text-slate-700 dark:text-slate-300">Objection:</strong> object to our processing based on legitimate interests</li>
           </ul>
           <p className="text-slate-600 dark:text-slate-400">
             To exercise any of these rights, please contact us at{' '}
@@ -102,7 +102,7 @@ export default function PrivacyPage() {
           <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200">Complaints</h2>
           <p className="text-slate-600 dark:text-slate-400">
             If you are unhappy with how we have handled your personal data, you have the right to complain to
-            the Information Commissioner&apos;s Office (ICO) — the UK&apos;s independent data protection authority.
+            the Information Commissioner&apos;s Office (ICO), the UK&apos;s independent data protection authority.
           </p>
           <p className="text-slate-600 dark:text-slate-400">
             ICO website:{' '}

@@ -103,7 +103,7 @@ export default function RinksPage() {
               {rinks.map((r) => (
                 <tr key={r.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                   <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200">{r.number}</td>
-                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{r.label ?? '—'}</td>
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{r.label ?? ''}</td>
                   <td className="px-4 py-3">
                     <Badge variant={r.isActive ? 'default' : 'secondary'}>
                       {r.isActive ? 'Active' : 'Inactive'}
