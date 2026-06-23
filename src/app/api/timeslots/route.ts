@@ -13,7 +13,7 @@ const createSchema = z.object({
 })
 
 export async function GET() {
-  const rows = await db.select().from(timeSlots).orderBy(timeSlots.sortOrder)
+  const rows = await db.select().from(timeSlots).orderBy(timeSlots.startTime)
   return NextResponse.json({ timeSlots: rows })
 }
 

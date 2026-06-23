@@ -39,7 +39,7 @@ export async function getAllRinks() {
 }
 
 export async function getTimeSlots() {
-  return db.select().from(timeSlots).orderBy(timeSlots.sortOrder)
+  return db.select().from(timeSlots).orderBy(timeSlots.startTime)
 }
 
 export async function getBookingsForDate(date: string): Promise<BookingWithPlayers[]> {
@@ -83,7 +83,7 @@ export async function checkBookingConflict(
   excludeId?: number
 ) {
   const [allSlots, existing] = await Promise.all([
-    db.select({ id: timeSlots.id }).from(timeSlots).orderBy(timeSlots.sortOrder),
+    db.select({ id: timeSlots.id }).from(timeSlots).orderBy(timeSlots.startTime),
     db
       .select({ id: bookings.id, timeSlotId: bookings.timeSlotId, durationSlots: bookings.durationSlots })
       .from(bookings)

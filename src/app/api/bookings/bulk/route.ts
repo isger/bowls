@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
 
   // Two queries total regardless of how many dates × rinks are requested
   const [allSlots, existingRaw] = await Promise.all([
-    db.select({ id: timeSlots.id }).from(timeSlots).orderBy(timeSlots.sortOrder),
+    db.select({ id: timeSlots.id }).from(timeSlots).orderBy(timeSlots.startTime),
     db
       .select({ id: bookings.id, date: bookings.date, rinkId: bookings.rinkId, timeSlotId: bookings.timeSlotId, durationSlots: bookings.durationSlots })
       .from(bookings)
