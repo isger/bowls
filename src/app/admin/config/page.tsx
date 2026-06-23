@@ -1,12 +1,9 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { Plus, Loader2, Trash2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { Loader2, Trash2, Plus } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 
 interface Rink {
   id: number
@@ -22,30 +19,50 @@ interface TimeSlot {
   sortOrder: number
 }
 
+function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: () => void; disabled?: boolean }) {
+  return (
+    <button
+      role="switch"
+      aria-checked={checked}
+      onClick={onChange}
+      disabled={disabled}
+      className={[
+        'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2',
+        'disabled:cursor-not-allowed disabled:opacity-50',
+        checked ? 'bg-slate-800 dark:bg-slate-200' : 'bg-slate-200 dark:bg-slate-700',
+      ].join(' ')}
+    >
+      <span className={[
+        'pointer-events-none inline-block h-4 w-4 rounded-full bg-white dark:bg-slate-900 shadow-sm ring-0 transition-transform duration-200',
+        checked ? 'translate-x-4' : 'translate-x-0',
+      ].join(' ')} />
+    </button>
+  )
+}
+
 export default function ConfigPage() {
-  // Rinks state
   const [rinks, setRinks] = useState<Rink[]>([])
   const [rinksLoading, setRinksLoading] = useState(true)
-  const [rinkModalOpen, setRinkModalOpen] = useState(false)
+  const [togglingRinkId, setTogglingRinkId] = useState<number | null>(null)
   const [rinkNumber, setRinkNumber] = useState('')
   const [rinkLabel, setRinkLabel] = useState('')
   const [rinkSaving, setRinkSaving] = useState(false)
   const [rinkError, setRinkError] = useState<string | null>(null)
 
-  // Time slots state
   const [slots, setSlots] = useState<TimeSlot[]>([])
   const [slotsLoading, setSlotsLoading] = useState(true)
-
-  // Durations state
-  const [enabledDurations, setEnabledDurations] = useState<Set<number>>(new Set())
-  const [durationsLoading, setDurationsLoading] = useState(true)
-  const [togglingDuration, setTogglingDuration] = useState<number | null>(null)
-  const [slotModalOpen, setSlotModalOpen] = useState(false)
   const [startTime, setStartTime] = useState('')
   const [endTime, setEndTime] = useState('')
   const [slotSaving, setSlotSaving] = useState(false)
   const [slotError, setSlotError] = useState<string | null>(null)
   const [deletingSlotId, setDeletingSlotId] = useState<number | null>(null)
+
+  const [enabledDurations, setEnabledDurations] = useState<Set<number>>(new Set())
+  const [durationsLoading, setDurationsLoading] = useState(true)
+  const [togglingDuration, setTogglingDuration] = useState<number | null>(null)
+
+  const rinkLabelRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     fetch('/api/rinks')
@@ -64,15 +81,24 @@ export default function ConfigPage() {
       .finally(() => setDurationsLoading(false))
   }, [])
 
-  // Rink handlers
-  function openRinkModal() {
-    setRinkNumber('')
-    setRinkLabel('')
-    setRinkError(null)
-    setRinkModalOpen(true)
+  async function toggleRinkActive(rink: Rink) {
+    setTogglingRinkId(rink.id)
+    try {
+      const res = await fetch(`/api/rinks/${rink.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isActive: !rink.isActive }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setRinks((prev) => prev.map((r) => (r.id === rink.id ? data.rink : r)))
+      }
+    } finally {
+      setTogglingRinkId(null)
+    }
   }
 
-  async function handleCreateRink() {
+  async function handleAddRink() {
     const n = parseInt(rinkNumber)
     if (isNaN(n)) return
     setRinkSaving(true)
@@ -81,7 +107,7 @@ export default function ConfigPage() {
       const res = await fetch('/api/rinks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ number: n, label: rinkLabel || undefined }),
+        body: JSON.stringify({ number: n, label: rinkLabel.trim() || undefined }),
       })
       const data = await res.json()
       if (!res.ok) {
@@ -89,25 +115,51 @@ export default function ConfigPage() {
         return
       }
       setRinks((prev) => [...prev, data.rink].sort((a, b) => a.number - b.number))
-      setRinkModalOpen(false)
+      setRinkNumber('')
+      setRinkLabel('')
+      rinkLabelRef.current?.focus()
     } finally {
       setRinkSaving(false)
     }
   }
 
-  async function toggleActive(rink: Rink) {
-    const res = await fetch(`/api/rinks/${rink.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ isActive: !rink.isActive }),
-    })
-    if (res.ok) {
+  async function handleAddSlot() {
+    setSlotSaving(true)
+    setSlotError(null)
+    try {
+      const res = await fetch('/api/timeslots', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ startTime, endTime }),
+      })
       const data = await res.json()
-      setRinks((prev) => prev.map((r) => (r.id === rink.id ? data.rink : r)))
+      if (!res.ok) {
+        setSlotError(typeof data.error === 'string' ? data.error : 'Something went wrong')
+        return
+      }
+      setSlots((prev) => [...prev, data.timeSlot])
+      setStartTime('')
+      setEndTime('')
+    } finally {
+      setSlotSaving(false)
     }
   }
 
-  // Duration handlers
+  async function handleDeleteSlot(id: number) {
+    setDeletingSlotId(id)
+    try {
+      const res = await fetch(`/api/timeslots/${id}`, { method: 'DELETE' })
+      if (res.ok) {
+        setSlots((prev) => prev.filter((s) => s.id !== id))
+      } else {
+        const data = await res.json()
+        setSlotError(typeof data.error === 'string' ? data.error : 'Could not delete time slot')
+      }
+    } finally {
+      setDeletingSlotId(null)
+    }
+  }
+
   async function toggleDuration(d: number) {
     setTogglingDuration(d)
     try {
@@ -127,281 +179,185 @@ export default function ConfigPage() {
     }
   }
 
-  // Time slot handlers
-  function openSlotModal() {
-    setStartTime('')
-    setEndTime('')
-    setSlotError(null)
-    setSlotModalOpen(true)
-  }
-
-  async function handleCreateSlot() {
-    setSlotSaving(true)
-    setSlotError(null)
-    try {
-      const res = await fetch('/api/timeslots', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ startTime, endTime }),
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setSlotError(typeof data.error === 'string' ? data.error : 'Something went wrong')
-        return
-      }
-      setSlots((prev) => [...prev, data.timeSlot])
-      setSlotModalOpen(false)
-    } finally {
-      setSlotSaving(false)
-    }
-  }
-
-  async function handleDeleteSlot(id: number) {
-    setDeletingSlotId(id)
-    try {
-      const res = await fetch(`/api/timeslots/${id}`, { method: 'DELETE' })
-      if (res.ok) {
-        setSlots((prev) => prev.filter((s) => s.id !== id))
-      } else {
-        const data = await res.json()
-        alert(typeof data.error === 'string' ? data.error : 'Could not delete time slot')
-      }
-    } finally {
-      setDeletingSlotId(null)
-    }
-  }
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
         <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Configuration</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Manage club settings</p>
       </div>
 
-      {/* Rinks */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">Rinks</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Configure the rinks shown on the diary</p>
+      <div className="grid md:grid-cols-2 gap-6 items-start">
+        {/* ── Rinks ── */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm">
+          <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800">
+            <h2 className="font-semibold text-slate-800 dark:text-slate-200">Rinks</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Toggle to show or hide on the diary</p>
           </div>
-          <Button size="sm" onClick={openRinkModal}>
-            <Plus size={16} className="mr-2" />
-            Add rink
-          </Button>
-        </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm overflow-hidden">
-          {rinksLoading ? (
-            <div className="p-8 text-center text-slate-400 dark:text-slate-500">Loading…</div>
-          ) : (
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium text-slate-500 dark:text-slate-400">Number</th>
-                  <th className="text-left px-4 py-3 font-medium text-slate-500 dark:text-slate-400">Label</th>
-                  <th className="text-left px-4 py-3 font-medium text-slate-500 dark:text-slate-400">Status</th>
-                  <th className="px-4 py-3" />
-                </tr>
-              </thead>
-              <tbody>
-                {rinks.map((r, i) => (
-                  <tr key={r.id} className={i % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50 dark:bg-slate-800/50'}>
-                    <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200">{r.number}</td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{r.label ?? '—'}</td>
-                    <td className="px-4 py-3">
-                      <Badge variant={r.isActive ? 'default' : 'secondary'}>
-                        {r.isActive ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <Button size="sm" variant="ghost" className="text-xs h-7" onClick={() => toggleActive(r)}>
-                        {r.isActive ? 'Deactivate' : 'Activate'}
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-                {rinks.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="px-4 py-8 text-center text-slate-400 dark:text-slate-500">
-                      No rinks configured yet
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          )}
-        </div>
-      </section>
-
-      {/* Time Slots */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">Time Slots</h2>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Configure the booking time blocks shown on the diary</p>
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            {rinksLoading ? (
+              <div className="px-5 py-6 text-sm text-slate-400 dark:text-slate-500 flex items-center gap-2">
+                <Loader2 size={14} className="animate-spin" /> Loading…
+              </div>
+            ) : rinks.length === 0 ? (
+              <div className="px-5 py-6 text-sm text-slate-400 dark:text-slate-500 text-center">No rinks yet</div>
+            ) : (
+              rinks.map((rink) => (
+                <div key={rink.id} className="flex items-center justify-between px-5 py-3">
+                  <div>
+                    <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                      {rink.label ?? `Rink ${rink.number}`}
+                    </span>
+                    {rink.label && (
+                      <span className="ml-2 text-xs text-slate-400 dark:text-slate-500">#{rink.number}</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-xs text-slate-400 dark:text-slate-500">
+                      {rink.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                    <Toggle
+                      checked={rink.isActive}
+                      onChange={() => toggleRinkActive(rink)}
+                      disabled={togglingRinkId === rink.id}
+                    />
+                  </div>
+                </div>
+              ))
+            )}
           </div>
-          <Button size="sm" onClick={openSlotModal}>
-            <Plus size={16} className="mr-2" />
-            Add time slot
-          </Button>
-        </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm overflow-hidden">
-          {slotsLoading ? (
-            <div className="p-8 text-center text-slate-400 dark:text-slate-500">Loading…</div>
-          ) : (
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium text-slate-500 dark:text-slate-400">Start</th>
-                  <th className="text-left px-4 py-3 font-medium text-slate-500 dark:text-slate-400">End</th>
-                  <th className="px-4 py-3" />
-                </tr>
-              </thead>
-              <tbody>
-                {slots.map((s, i) => (
-                  <tr key={s.id} className={i % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-50 dark:bg-slate-800/50'}>
-                    <td className="px-4 py-3 font-medium text-slate-800 dark:text-slate-200">{s.startTime}</td>
-                    <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{s.endTime}</td>
-                    <td className="px-4 py-3 text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteSlot(s.id)}
-                        disabled={deletingSlotId === s.id}
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40 h-7"
-                      >
-                        {deletingSlotId === s.id
-                          ? <Loader2 size={14} className="animate-spin" />
-                          : <Trash2 size={14} />}
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-                {slots.length === 0 && (
-                  <tr>
-                    <td colSpan={3} className="px-4 py-8 text-center text-slate-400 dark:text-slate-500">
-                      No time slots configured yet
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          )}
-        </div>
-      </section>
-
-      {/* Booking Durations */}
-      <section className="space-y-4">
-        <div>
-          <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">Booking Durations</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Select which durations are available when creating a booking</p>
-        </div>
-
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm p-4">
-          {durationsLoading ? (
-            <div className="flex items-center gap-2 text-slate-400 dark:text-slate-500 text-sm">
-              <Loader2 size={14} className="animate-spin" /> Loading…
-            </div>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {Array.from({ length: 12 }, (_, i) => i + 1).map((d) => {
-                const enabled = enabledDurations.has(d)
-                const toggling = togglingDuration === d
-                return (
-                  <button
-                    key={d}
-                    onClick={() => toggleDuration(d)}
-                    disabled={toggling}
-                    className={[
-                      'px-4 py-2 rounded-md text-sm font-medium border transition-colors disabled:opacity-50',
-                      enabled
-                        ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-slate-800 dark:border-slate-200'
-                        : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500',
-                    ].join(' ')}
-                  >
-                    {toggling ? <Loader2 size={14} className="animate-spin inline" /> : `${d}h`}
-                  </button>
-                )
-              })}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* Add Rink modal */}
-      <Dialog open={rinkModalOpen} onOpenChange={setRinkModalOpen}>
-        <DialogContent className="sm:max-w-xs">
-          <DialogHeader>
-            <DialogTitle>Add rink</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <Label>Rink number <span className="text-red-500">*</span></Label>
+          {/* Inline add form */}
+          <div className="px-5 py-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Add rink</p>
+            <div className="flex gap-2">
               <Input
                 type="number"
                 min={1}
                 max={99}
                 value={rinkNumber}
-                onChange={(e) => setRinkNumber(e.target.value)}
-                placeholder="e.g. 7"
+                onChange={(e) => { setRinkNumber(e.target.value); setRinkError(null) }}
+                onKeyDown={(e) => e.key === 'Enter' && rinkLabelRef.current?.focus()}
+                placeholder="No."
+                className="w-16 text-sm h-9"
               />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Label <span className="text-slate-400 font-normal">(optional)</span></Label>
               <Input
+                ref={rinkLabelRef}
                 value={rinkLabel}
                 onChange={(e) => setRinkLabel(e.target.value)}
-                placeholder="e.g. Championship Rink"
+                onKeyDown={(e) => e.key === 'Enter' && handleAddRink()}
+                placeholder="Label (optional)"
+                className="flex-1 text-sm h-9"
               />
+              <Button size="sm" className="h-9 px-3" onClick={handleAddRink} disabled={rinkSaving || !rinkNumber}>
+                {rinkSaving ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+              </Button>
             </div>
-            {rinkError && <p className="text-sm text-red-600">{rinkError}</p>}
+            {rinkError && <p className="text-xs text-red-600">{rinkError}</p>}
           </div>
-          <DialogFooter>
-            <Button variant="outline" size="sm" onClick={() => setRinkModalOpen(false)}>Cancel</Button>
-            <Button size="sm" onClick={handleCreateRink} disabled={rinkSaving || !rinkNumber}>
-              {rinkSaving && <Loader2 size={14} className="animate-spin mr-1" />}
-              Add rink
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        </div>
 
-      {/* Add Time Slot modal */}
-      <Dialog open={slotModalOpen} onOpenChange={setSlotModalOpen}>
-        <DialogContent className="sm:max-w-xs">
-          <DialogHeader>
-            <DialogTitle>Add time slot</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <Label>Start time <span className="text-red-500">*</span></Label>
-              <Input
-                type="time"
-                value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
-              />
+        {/* ── Right column ── */}
+        <div className="space-y-6">
+          {/* Time Slots */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm">
+            <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800">
+              <h2 className="font-semibold text-slate-800 dark:text-slate-200">Time Slots</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Booking time blocks shown on the diary</p>
             </div>
-            <div className="space-y-1.5">
-              <Label>End time <span className="text-red-500">*</span></Label>
-              <Input
-                type="time"
-                value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
-              />
+
+            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+              {slotsLoading ? (
+                <div className="px-5 py-6 text-sm text-slate-400 dark:text-slate-500 flex items-center gap-2">
+                  <Loader2 size={14} className="animate-spin" /> Loading…
+                </div>
+              ) : slots.length === 0 ? (
+                <div className="px-5 py-6 text-sm text-slate-400 dark:text-slate-500 text-center">No time slots yet</div>
+              ) : (
+                slots.map((s) => (
+                  <div key={s.id} className="flex items-center justify-between px-5 py-2.5">
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300 tabular-nums">
+                      {s.startTime} – {s.endTime}
+                    </span>
+                    <button
+                      onClick={() => handleDeleteSlot(s.id)}
+                      disabled={deletingSlotId === s.id}
+                      className="text-slate-300 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 disabled:opacity-40 transition-colors p-1"
+                    >
+                      {deletingSlotId === s.id
+                        ? <Loader2 size={14} className="animate-spin" />
+                        : <Trash2 size={14} />}
+                    </button>
+                  </div>
+                ))
+              )}
             </div>
-            {slotError && <p className="text-sm text-red-600">{slotError}</p>}
+
+            {/* Inline add form */}
+            <div className="px-5 py-4 border-t border-slate-100 dark:border-slate-800 space-y-2">
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Add time slot</p>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => { setStartTime(e.target.value); setSlotError(null) }}
+                  className="flex-1 text-sm h-9 tabular-nums"
+                />
+                <span className="text-slate-400 dark:text-slate-500 text-sm shrink-0">–</span>
+                <Input
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => { setEndTime(e.target.value); setSlotError(null) }}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAddSlot()}
+                  className="flex-1 text-sm h-9 tabular-nums"
+                />
+                <Button size="sm" className="h-9 px-3 shrink-0" onClick={handleAddSlot} disabled={slotSaving || !startTime || !endTime}>
+                  {slotSaving ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                </Button>
+              </div>
+              {slotError && <p className="text-xs text-red-600">{slotError}</p>}
+            </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" size="sm" onClick={() => setSlotModalOpen(false)}>Cancel</Button>
-            <Button size="sm" onClick={handleCreateSlot} disabled={slotSaving || !startTime || !endTime}>
-              {slotSaving && <Loader2 size={14} className="animate-spin mr-1" />}
-              Add time slot
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+          {/* Booking Durations */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm">
+            <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800">
+              <h2 className="font-semibold text-slate-800 dark:text-slate-200">Booking Durations</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">Allowed lengths when creating a booking</p>
+            </div>
+
+            <div className="px-5 py-4">
+              {durationsLoading ? (
+                <div className="flex items-center gap-2 text-sm text-slate-400 dark:text-slate-500">
+                  <Loader2 size={14} className="animate-spin" /> Loading…
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map((d) => {
+                    const enabled = enabledDurations.has(d)
+                    const toggling = togglingDuration === d
+                    return (
+                      <button
+                        key={d}
+                        onClick={() => toggleDuration(d)}
+                        disabled={toggling}
+                        className={[
+                          'h-9 w-12 rounded-md text-sm font-medium border transition-colors disabled:opacity-50',
+                          enabled
+                            ? 'bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 border-slate-800 dark:border-slate-200'
+                            : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500',
+                        ].join(' ')}
+                      >
+                        {toggling ? <Loader2 size={13} className="animate-spin mx-auto" /> : `${d}h`}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

@@ -209,7 +209,7 @@ export function BookingModal({
               {fieldErrors.rink && <p className="text-xs text-red-600">{fieldErrors.rink}</p>}
             </div>
             <div className="space-y-2">
-              <Label className="text-base font-semibold">Time Slot <span className="text-red-500">*</span></Label>
+              <Label className="text-base font-semibold">{durationSlots > 1 ? 'Starting at' : 'Time Slot'} <span className="text-red-500">*</span></Label>
               <Select value={selectedSlotId?.toString() ?? ''} onValueChange={(v) => { setSelectedSlotId(Number(v)); setFieldErrors((p) => ({ ...p, slot: undefined })) }} disabled={!!existing}>
                 <SelectTrigger className={`h-11 text-base ${fieldErrors.slot ? 'border-red-400 ring-red-400' : ''}`}><SelectValue placeholder="Select time" /></SelectTrigger>
                 <SelectContent>

@@ -4,12 +4,13 @@ import type { BookingWithPlayers, Rink, TimeSlot } from '@/lib/db/schema'
 import { useMemo, useState } from 'react'
 import { CalendarGrid } from './CalendarGrid'
 import { BookingModal } from './BookingModal'
+import { BulkBookingModal } from './BulkBookingModal'
 import { DateNav } from './DateNav'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { BOOKING_TYPE_CONFIG } from '@/lib/booking-types'
-import { Plus, Printer, SlidersHorizontal, X } from 'lucide-react'
+import { Layers, Plus, Printer, SlidersHorizontal, X } from 'lucide-react'
 
 interface Props {
   date: string
@@ -39,6 +40,7 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
     userRole === 'admin' || (userRole === 'member' && b.createdBy === userId)
   const [bookings, setBookings] = useState<BookingWithPlayers[]>(initialBookings)
   const [modal, setModal] = useState<ModalState>({ open: false, rinkId: null, timeSlotId: null })
+  const [bulkModalOpen, setBulkModalOpen] = useState(false)
   const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set())
   const [filterOpen, setFilterOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -90,6 +92,10 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
   function handleSave(booking: BookingWithPlayers) {
     setBookings((prev) => [...prev.filter((b) => b.id !== booking.id), booking])
     closeModal()
+  }
+
+  function handleBulkSave(created: BookingWithPlayers[]) {
+    setBookings((prev) => [...prev, ...created])
   }
 
   function handleDelete(id: number) {
@@ -188,6 +194,13 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
             </PopoverContent>
           </Popover>
 
+          {canDelete && rinks.length > 1 && (
+            <Button variant="outline" className="h-12 sm:h-9 text-base sm:text-sm flex-1 sm:flex-none gap-2" onClick={() => setBulkModalOpen(true)}>
+              <Layers size={18} />
+              <span className="sm:hidden">Bulk</span>
+              <span className="hidden sm:inline">Bulk Book</span>
+            </Button>
+          )}
           {canCreate && (
             <Button className="h-12 sm:h-9 text-base sm:text-sm flex-1 sm:flex-none gap-2" onClick={() => openModal()}>
               <Plus size={18} />
@@ -285,6 +298,16 @@ export function RinkCalendar({ date, rinks, timeSlots, initialBookings, userRole
           timeSlots={timeSlots}
           bookings={bookings}
           canDelete={canDelete}
+        />
+      )}
+      {canDelete && (
+        <BulkBookingModal
+          open={bulkModalOpen}
+          onClose={() => setBulkModalOpen(false)}
+          onSave={handleBulkSave}
+          date={date}
+          rinks={rinks}
+          timeSlots={timeSlots}
         />
       )}
     </div>
