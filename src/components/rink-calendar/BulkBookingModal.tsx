@@ -220,7 +220,7 @@ export function BulkBookingModal({ open, onClose, onSave, date, rinks, timeSlots
                 <SelectTrigger className={`h-11 text-base ${fieldErrors.slot ? 'border-red-400 ring-red-400' : ''}`}>
                   <SelectValue placeholder="Select time" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent position="popper" side="bottom" avoidCollisions={false} className="max-h-60">
                   {timeSlots.map((s) => (
                     <SelectItem key={s.id} value={s.id.toString()} className="text-base py-2">
                       {s.startTime}–{s.endTime}
@@ -236,7 +236,7 @@ export function BulkBookingModal({ open, onClose, onSave, date, rinks, timeSlots
                 <Label className="text-base font-semibold">Duration</Label>
                 <Select value={durationSlots.toString()} onValueChange={(v) => setDurationSlots(Number(v))}>
                   <SelectTrigger className="h-11 text-base"><SelectValue /></SelectTrigger>
-                  <SelectContent>
+                  <SelectContent position="popper" side="bottom" avoidCollisions={false}>
                     {allowedDurations.filter((d) => d <= maxDuration).map((d) => {
                       const endSlot = startIdx >= 0 ? timeSlots[startIdx + d - 1] : null
                       return (
@@ -258,7 +258,7 @@ export function BulkBookingModal({ open, onClose, onSave, date, rinks, timeSlots
               <SelectTrigger className={`h-11 text-base ${fieldErrors.type ? 'border-red-400 ring-red-400' : ''}`}>
                 <SelectValue placeholder="Select a type…" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper" side="bottom" avoidCollisions={false}>
                 {BOOKING_TYPES.map((t) => <SelectItem key={t.value} value={t.value} className="text-base py-2">{t.label}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -339,7 +339,7 @@ export function BulkBookingModal({ open, onClose, onSave, date, rinks, timeSlots
                   <span className="text-sm text-slate-600 dark:text-slate-300">For</span>
                   <Select value={weeklyCount.toString()} onValueChange={(v) => setWeeklyCount(Number(v))}>
                     <SelectTrigger className="h-9 text-sm w-36"><SelectValue /></SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper" side="bottom" avoidCollisions={false}>
                       {[2, 3, 4, 6, 8, 12, 16, 20, 26].map((n) => (
                         <SelectItem key={n} value={n.toString()} className="text-sm">{n} weeks</SelectItem>
                       ))}

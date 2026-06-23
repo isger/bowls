@@ -53,11 +53,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     .where(eq(bookings.id, bookingId))
     .returning()
 
-  let savedPlayers = await db
-    .select()
-    .from(bookingPlayers)
-    .where(eq(bookingPlayers.bookingId, bookingId))
-
+  let savedPlayers: (typeof bookingPlayers.$inferSelect)[]
   if (players !== undefined) {
     await db.delete(bookingPlayers).where(eq(bookingPlayers.bookingId, bookingId))
     savedPlayers = players.length
@@ -66,6 +62,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           .values(players.map((p) => ({ bookingId, userId: p.userId, name: p.name })))
           .returning()
       : []
+  } else {
+    savedPlayers = await db
+      .select()
+      .from(bookingPlayers)
+      .where(eq(bookingPlayers.bookingId, bookingId))
   }
 
   return NextResponse.json({ booking: { ...updated, players: savedPlayers } })
@@ -80,9 +81,6 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   const { id } = await params
   const bookingId = parseInt(id)
   if (isNaN(bookingId)) return NextResponse.json({ error: 'Invalid id' }, { status: 400 })
-
-  const existing = await getBookingById(bookingId)
-  if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   await db.delete(bookings).where(eq(bookings.id, bookingId))
   return new NextResponse(null, { status: 204 })

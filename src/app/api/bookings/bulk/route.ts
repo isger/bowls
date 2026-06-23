@@ -1,7 +1,8 @@
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { bookings } from '@/lib/db/schema'
-import { checkBookingConflict } from '@/lib/db/queries'
+import { bookings, timeSlots } from '@/lib/db/schema'
+import { detectConflict } from '@/lib/db/queries'
+import { and, inArray } from 'drizzle-orm'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
@@ -35,13 +36,31 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Session missing user ID' }, { status: 500 })
   }
 
+  // Two queries total regardless of how many dates × rinks are requested
+  const [allSlots, existingRaw] = await Promise.all([
+    db.select({ id: timeSlots.id }).from(timeSlots).orderBy(timeSlots.sortOrder),
+    db
+      .select({ id: bookings.id, date: bookings.date, rinkId: bookings.rinkId, timeSlotId: bookings.timeSlotId, durationSlots: bookings.durationSlots })
+      .from(bookings)
+      .where(and(inArray(bookings.date, dates), inArray(bookings.rinkId, rinkIds))),
+  ])
+
+  // Group existing bookings by date:rinkId for O(1) lookup
+  const byKey = new Map<string, { id: number; timeSlotId: number; durationSlots: number | null }[]>()
+  for (const b of existingRaw) {
+    const key = `${b.date}:${b.rinkId}`
+    const arr = byKey.get(key) ?? []
+    arr.push(b)
+    byKey.set(key, arr)
+  }
+
   const conflicts: { date: string; rinkId: number }[] = []
   const toInsert: { date: string; rinkId: number }[] = []
 
   for (const date of dates) {
     for (const rinkId of rinkIds) {
-      const conflict = await checkBookingConflict(date, rinkId, timeSlotId, durationSlots)
-      if (conflict) {
+      const existing = byKey.get(`${date}:${rinkId}`) ?? []
+      if (detectConflict(timeSlotId, durationSlots, allSlots, existing)) {
         conflicts.push({ date, rinkId })
       } else {
         toInsert.push({ date, rinkId })

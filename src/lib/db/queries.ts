@@ -3,6 +3,29 @@ import { db } from './index'
 import { bookingPlayers, bookings, rinks, timeSlots, users } from './schema'
 import type { BookingWithPlayers } from './schema'
 
+type SlotRow = { id: number }
+type BookingRow = { id: number; timeSlotId: number; durationSlots: number | null }
+
+export function detectConflict(
+  timeSlotId: number,
+  durationSlots: number,
+  allSlots: SlotRow[],
+  existing: BookingRow[],
+  excludeId?: number
+): boolean {
+  const startIdx = allSlots.findIndex((s) => s.id === timeSlotId)
+  if (startIdx === -1) return false
+  const newSlotIds = new Set(allSlots.slice(startIdx, startIdx + durationSlots).map((s) => s.id))
+  for (const b of existing) {
+    if (b.id === excludeId) continue
+    const bIdx = allSlots.findIndex((s) => s.id === b.timeSlotId)
+    if (bIdx === -1) continue
+    const bSlotIds = allSlots.slice(bIdx, bIdx + (b.durationSlots ?? 1)).map((s) => s.id)
+    if (bSlotIds.some((id) => newSlotIds.has(id))) return true
+  }
+  return false
+}
+
 export async function getActiveRinks() {
   return db
     .select()
@@ -59,24 +82,12 @@ export async function checkBookingConflict(
   durationSlots: number,
   excludeId?: number
 ) {
-  const allSlots = await db.select().from(timeSlots).orderBy(timeSlots.sortOrder)
-  const startIdx = allSlots.findIndex((s) => s.id === timeSlotId)
-  if (startIdx === -1) return false
-  const newSlotIds = new Set(
-    allSlots.slice(startIdx, startIdx + durationSlots).map((s) => s.id)
-  )
-
-  const existing = await db
-    .select({ id: bookings.id, timeSlotId: bookings.timeSlotId, durationSlots: bookings.durationSlots })
-    .from(bookings)
-    .where(and(eq(bookings.date, date), eq(bookings.rinkId, rinkId)))
-
-  for (const b of existing) {
-    if (b.id === excludeId) continue
-    const bIdx = allSlots.findIndex((s) => s.id === b.timeSlotId)
-    if (bIdx === -1) continue
-    const bSlotIds = allSlots.slice(bIdx, bIdx + (b.durationSlots ?? 1)).map((s) => s.id)
-    if (bSlotIds.some((id) => newSlotIds.has(id))) return true
-  }
-  return false
+  const [allSlots, existing] = await Promise.all([
+    db.select({ id: timeSlots.id }).from(timeSlots).orderBy(timeSlots.sortOrder),
+    db
+      .select({ id: bookings.id, timeSlotId: bookings.timeSlotId, durationSlots: bookings.durationSlots })
+      .from(bookings)
+      .where(and(eq(bookings.date, date), eq(bookings.rinkId, rinkId))),
+  ])
+  return detectConflict(timeSlotId, durationSlots, allSlots, existing, excludeId)
 }
