@@ -3,7 +3,7 @@ import { db } from './index'
 import { bookingPlayers, bookings, rinks, timeSlots, users } from './schema'
 import type { BookingWithPlayers } from './schema'
 
-type SlotRow = { id: number }
+type SlotRow = { id: number; startTime: string; endTime: string }
 type BookingRow = { id: number; timeSlotId: number; durationSlots: number | null }
 
 export function detectConflict(
@@ -13,15 +13,20 @@ export function detectConflict(
   existing: BookingRow[],
   excludeId?: number
 ): boolean {
-  const startIdx = allSlots.findIndex((s) => s.id === timeSlotId)
-  if (startIdx === -1) return false
-  const newSlotIds = new Set(allSlots.slice(startIdx, startIdx + durationSlots).map((s) => s.id))
+  const newIdx = allSlots.findIndex((s) => s.id === timeSlotId)
+  if (newIdx === -1) return false
+  const newLastIdx = Math.min(newIdx + durationSlots - 1, allSlots.length - 1)
+  const newStart = allSlots[newIdx].startTime
+  const newEnd   = allSlots[newLastIdx].endTime
+
   for (const b of existing) {
     if (b.id === excludeId) continue
     const bIdx = allSlots.findIndex((s) => s.id === b.timeSlotId)
     if (bIdx === -1) continue
-    const bSlotIds = allSlots.slice(bIdx, bIdx + (b.durationSlots ?? 1)).map((s) => s.id)
-    if (bSlotIds.some((id) => newSlotIds.has(id))) return true
+    const bLastIdx = Math.min(bIdx + (b.durationSlots ?? 1) - 1, allSlots.length - 1)
+    const bStart = allSlots[bIdx].startTime
+    const bEnd   = allSlots[bLastIdx].endTime
+    if (newStart < bEnd && newEnd > bStart) return true
   }
   return false
 }
@@ -83,7 +88,7 @@ export async function checkBookingConflict(
   excludeId?: number
 ) {
   const [allSlots, existing] = await Promise.all([
-    db.select({ id: timeSlots.id }).from(timeSlots).orderBy(timeSlots.startTime),
+    db.select({ id: timeSlots.id, startTime: timeSlots.startTime, endTime: timeSlots.endTime }).from(timeSlots).orderBy(timeSlots.startTime),
     db
       .select({ id: bookings.id, timeSlotId: bookings.timeSlotId, durationSlots: bookings.durationSlots })
       .from(bookings)

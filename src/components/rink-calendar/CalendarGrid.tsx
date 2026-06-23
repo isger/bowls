@@ -59,12 +59,18 @@ export function CalendarGrid({ rinks, timeSlots, bookings, canCreate, canEditBoo
   const coveredCells = new Set<string>()
   for (const b of bookings) {
     const dur = b.durationSlots ?? 1
-    if (dur <= 1) continue
     const si = timeSlots.findIndex(s => s.id === b.timeSlotId)
     if (si === -1) continue
-    for (let i = 1; i < dur; i++) {
-      const s = timeSlots[si + i]
-      if (s) coveredCells.add(`${b.rinkId}-${s.id}`)
+    const lastSlot = timeSlots[Math.min(si + dur - 1, timeSlots.length - 1)]
+    const bStart = parseTime(timeSlots[si].startTime)
+    const bEnd   = parseTime(lastSlot.endTime)
+    for (const slot of timeSlots) {
+      if (slot.id === b.timeSlotId) continue
+      const sStart = parseTime(slot.startTime)
+      const sEnd   = parseTime(slot.endTime)
+      if (sStart < bEnd && sEnd > bStart) {
+        coveredCells.add(`${b.rinkId}-${slot.id}`)
+      }
     }
   }
 
