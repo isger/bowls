@@ -112,7 +112,7 @@ export function CalendarGrid({ rinks, timeSlots, bookings, canCreate, canEditBoo
           <div
             key={label}
             style={{ gridColumn: 1, gridRow: row, zIndex: 1 }}
-            className="flex items-start justify-center pt-0.5 border-t border-slate-200 dark:border-slate-700 pointer-events-none"
+            className="flex items-center justify-center border-t border-slate-200 dark:border-slate-700 pointer-events-none"
           >
             <span className="text-xs font-bold text-slate-700 dark:text-slate-300 leading-none">
               {label}
@@ -126,11 +126,9 @@ export function CalendarGrid({ rinks, timeSlots, bookings, canCreate, canEditBoo
             <div
               key={`bg-${i}-${ci}`}
               style={{ gridColumn: ci + 2, gridRow: i + 2 }}
-              className={
-                i % unitsPerHour === 0
-                  ? 'border-t border-l border-slate-200 dark:border-slate-700'
-                  : 'border-t border-l border-dashed border-slate-100 dark:border-slate-800'
-              }
+              className={`border-l border-slate-200 dark:border-slate-700 ${
+                i % unitsPerHour === 0 ? 'border-t' : ''
+              }`}
             />
           ))
         )}
