@@ -38,7 +38,6 @@ export function CalendarGrid({ rinks, timeSlots, bookings, canCreate, canEditBoo
   })
   const baseUnit    = candidates.reduce((a, b) => gcd(a, b))
   const totalRows   = (dayEnd - dayStart) / baseUnit
-  const unitsPerHour = 60 / baseUnit
 
   // CSS grid row index for a given time in minutes (row 1 = header row)
   const toRow = (mins: number) => (mins - dayStart) / baseUnit + 2
@@ -120,19 +119,6 @@ export function CalendarGrid({ rinks, timeSlots, bookings, canCreate, canEditBoo
           </div>
         ))}
 
-        {/* ── Background grid lines for rink columns ────────────── */}
-        {Array.from({ length: totalRows }, (_, i) =>
-          rinks.map((_, ci) => (
-            <div
-              key={`bg-${i}-${ci}`}
-              style={{ gridColumn: ci + 2, gridRow: i + 2 }}
-              className={`border-l border-slate-200 dark:border-slate-700 ${
-                i % unitsPerHour === 0 ? 'border-t' : ''
-              }`}
-            />
-          ))
-        )}
-
         {/* ── Slot cells: bookings + empty clickable areas ────────── */}
         {timeSlots.map(slot => {
           const slotStartMins = parseTime(slot.startTime)
@@ -160,11 +146,17 @@ export function CalendarGrid({ rinks, timeSlots, bookings, canCreate, canEditBoo
               }
             }
 
+            const borderClasses = [
+              'border-l border-b border-slate-200 dark:border-slate-700',
+              slotStartMins % 60 === 0 ? 'border-t' : '',
+              ci === rinks.length - 1 ? 'border-r' : '',
+            ].filter(Boolean).join(' ')
+
             return (
               <div
                 key={`cell-${rink.id}-${slot.id}`}
                 style={{ gridColumn: ci + 2, gridRow: `${slotRow} / span ${rowSpan}`, zIndex: 2 }}
-                className="p-1 print:min-h-0"
+                className={`p-1 print:min-h-0 ${borderClasses}`}
               >
                 {booking ? (
                   <BookingCell
